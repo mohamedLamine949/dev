@@ -1,0 +1,261 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String            @id @default(uuid())
+  email            String?           @unique
+  phone            String?           @unique
+  passwordHash     String
+  firstName        String
+  lastName         String
+  role             String            @default("CANDIDATE")
+  level            String            @default("LEVEL_1")
+  ninaNumber       String?           @unique
+  passportNumber   String?           @unique
+  country          String
+  region           String?
+  city             String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  isSuspended      Boolean           @default(false)
+  alerts           Alert[]
+  applications     Application[]
+  candidateProfile CandidateProfile?
+  documents        Document[]
+  employerMembers  EmployerMember[]
+  messagesSent     Message[]
+  notifications    Notification[]
+  savedJobs        SavedJob[]
+  subscriptions    Subscription[]
+}
+
+model CandidateProfile {
+  id              String       @id @default(uuid())
+  userId          String       @unique
+  title           String?
+  summary         String?
+  availability    String?
+  salaryMin       Int?
+  salaryMax       Int?
+  isDiaspora      Boolean      @default(false)
+  returnType      String?
+  returnHorizon   String?
+  completionScore Int          @default(0)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  educations      Education[]
+  experiences     Experience[]
+  skills          Skill[]
+}
+
+model Experience {
+  id                String           @id @default(uuid())
+  profileId         String
+  title             String
+  company           String
+  type              String           @default("PRIVATE")
+  startDate         DateTime
+  endDate           DateTime?
+  description       String?
+  attestationFileId String?
+  profile           CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Education {
+  id            String           @id @default(uuid())
+  profileId     String
+  title         String
+  institution   String
+  country       String
+  year          Int
+  level         String
+  diplomaFileId String?
+  profile       CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Skill {
+  id        String           @id @default(uuid())
+  profileId String
+  name      String
+  level     String           @default("INTERMEDIATE")
+  profile   CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id              String           @id @default(uuid())
+  userId          String
+  name            String
+  category        String
+  s3Key           String
+  mimeType        String
+  size            Int
+  isExpired       Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  applicationDocs ApplicationDoc[]
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Employer {
+  id                 String           @id @default(uuid())
+  name               String           @unique
+  slug               String           @unique
+  category           String
+  description        String?
+  logoS3Key          String?
+  bannerS3Key        String?
+  nif                String?          // Numéro d'Identification Fiscale
+  rccm               String?          // Registre du Commerce et du Crédit Mobilier
+  isVerified         Boolean          @default(false)
+  verificationStatus String           @default("PENDING")  // PENDING | VERIFIED | REJECTED
+  verificationNote   String?
+  isFree             Boolean          @default(false)
+  responseRate       Float            @default(0.0)
+  avgResponseDays    Float            @default(0.0)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  members            EmployerMember[]
+  jobs               Job[]
+  subscribers        Subscription[]
+}
+
+model EmployerMember {
+  id         String   @id @default(uuid())
+  employerId String
+  userId     String
+  role       String   @default("RECRUITER")
+  employer   Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([employerId, userId])
+}
+
+model Job {
+  id               String        @id @default(uuid())
+  employerId       String
+  title            String
+  type             String
+  sector           String
+  regions          String
+  educationLevel   String
+  experienceLevel  String
+  description      String
+  requirements     String
+  salaryMin        Int?
+  salaryMax        Int?
+  deadline         DateTime
+  isDiasporaOpen   Boolean       @default(false)
+  isRemoteAbroad   Boolean       @default(false)
+  relocationAid    String?
+  status           String        @default("DRAFT")
+  viewCount        Int           @default(0)
+  applicationCount Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  publishedAt      DateTime?
+  applications     Application[]
+  employer         Employer      @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  requiredDocs     RequiredDoc[]
+  savedBy          SavedJob[]
+}
+
+model RequiredDoc {
+  id               String  @id @default(uuid())
+  jobId            String
+  documentCategory String
+  label            String
+  isOptional       Boolean @default(false)
+  job              Job     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+model Application {
+  id           String           @id @default(uuid())
+  jobId        String
+  userId       String
+  status       String           @default("SENT")
+  coverLetter  String?
+  introMessage String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  job          Job              @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents    ApplicationDoc[]
+  messages     Message[]
+
+  @@unique([jobId, userId])
+}
+
+model ApplicationDoc {
+  id            String      @id @default(uuid())
+  applicationId String
+  documentId    String
+  s3KeySnapshot String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  document      Document    @relation(fields: [documentId], references: [id])
+}
+
+model Message {
+  id             String      @id @default(uuid())
+  applicationId  String
+  senderId       String
+  content        String
+  type           String      @default("STANDARD")
+  summonDate     DateTime?
+  summonLocation String?
+  isRead         Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  application    Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  sender         User        @relation(fields: [senderId], references: [id])
+}
+
+model SavedJob {
+  id        String   @id @default(uuid())
+  userId    String
+  jobId     String
+  createdAt DateTime @default(now())
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+}
+
+model Subscription {
+  id         String    @id @default(uuid())
+  userId     String
+  employerId String?
+  sector     String?
+  jobType    String?
+  region     String?
+  employer   Employer? @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, employerId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  deepLink  String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Alert {
+  id             String  @id @default(uuid())
+  userId         String
+  sectors        String
+  jobTypes       String
+  regions        String
+  isDiasporaOnly Boolean @default(false)
+  isRemoteOnly   Boolean @default(false)
+  isActive       Boolean @default(true)
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

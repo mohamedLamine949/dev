@@ -1,58 +1,69 @@
-# Turborepo Tailwind CSS starter
+# 🇲🇱 MaliLink - Plateforme d'Emploi Moderne
 
-This Turborepo starter is maintained by the Turborepo core team.
+MaliLink est une plateforme de recrutement innovante dédiée au marché malien, offrant une expérience fluide pour les candidats et les recruteurs.
 
-## Using this example
+## 🚀 Architecture
 
-Run the following command:
+Le projet est un monorepo géré avec **pnpm** et **Turborepo** :
 
-```sh
-npx create-turbo@latest -e with-tailwind
+- `apps/web` : Application frontend (Next.js 15, Tailwind CSS, Lucide Icons)
+- `apps/api` : Backend API (NestJS, Prisma, PostgreSQL/Supabase)
+- `apps/admin` : Panneau d'administration (Vite, React)
+- `packages/shared-types` : Types TypeScript partagés entre frontend et backend
+
+## 🛠️ Installation
+
+### Prérequis
+
+- Node.js 18+
+- pnpm 8+
+- PostgreSQL (ou instance Supabase)
+
+### Étapes
+
+1. **Cloner le projet**
+   ```bash
+   git clone https://github.com/mohamedLamine949/dev.git
+   cd malilink
+   ```
+
+2. **Installer les dépendances**
+   ```bash
+   pnpm install
+   ```
+
+3. **Configuration de l'environnement**
+   - Copiez `apps/api/.env.example` vers `apps/api/.env` et remplissez votre `DATABASE_URL`.
+   - Copiez `apps/web/.env.example` vers `apps/web/.env.local` (déjà configuré par défaut pour le dev local).
+
+4. **Lancer la base de données (si locale)**
+   Si vous utilisez le `docker-compose.yml` fourni :
+   ```bash
+   docker-compose up -d
+   ```
+
+5. **Appliquer les migrations Prisma**
+   ```bash
+   cd apps/api
+   npx prisma migrate dev
+   ```
+
+## 🏎️ Lancer le projet en développement
+
+À la racine du projet :
+```bash
+pnpm dev
 ```
 
-## What's inside?
+L'application sera disponible sur :
+- Frontend : [http://localhost:3000](http://localhost:3000)
+- API : [http://localhost:3001](http://localhost:3001)
 
-This Turborepo includes the following packages/apps:
+## ✨ Nouveau Design
+Nous avons récemment implémenté une charte graphique moderne en "Black & White" avec des accents tricolores Maliens. Le design se veut premium, dynamique et épuré.
 
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Building packages/ui
-
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.ts`. This was chosen for several reasons:
-
-- Make sharing one `tailwind.config.ts` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
-
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.ts` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
-
-For example, in [tailwind.config.ts](packages/tailwind-config/tailwind.config.ts):
-
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
-```
-
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## 👥 Collaboration
+1. Créez une branche pour votre fonctionnalité : `git checkout -b feature/ma-feature`
+2. Commitez vos changements : `git commit -m 'feat: ajout de ...'`
+3. Pushez vers votre branche : `git push origin feature/ma-feature`
+4. Ouvrez une Pull Request.

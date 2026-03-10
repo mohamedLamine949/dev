@@ -1,0 +1,19 @@
+{
+    "name": "@malilink/validation-schemas",
+    "version": "1.0.0",
+    "description": "Zod validation schemas for MaliLink",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "lint": "eslint src/"
+    },
+    "dependencies": {
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "typescript": "^5.x.x"
+    }
+}
