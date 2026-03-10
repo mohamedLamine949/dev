@@ -32,20 +32,23 @@ Le projet est un monorepo géré avec **pnpm** et **Turborepo** :
    pnpm install
    ```
 
-3. **Configuration de l'environnement**
-   - Copiez `apps/api/.env.example` vers `apps/api/.env` et remplissez votre `DATABASE_URL`.
-   - Copiez `apps/web/.env.example` vers `apps/web/.env.local` (déjà configuré par défaut pour le dev local).
+3. **Configuration de la Base de Données (Supabase)**
+   Pour que le projet fonctionne, vous devez créer une instance de base de données PostgreSQL. Nous recommandons **Supabase** car c'est gratuit et rapide à mettre en place :
+   - Créez un compte sur [supabase.com](https://supabase.com).
+   - Créez un nouveau projet (ex: "MaliLink").
+   - Allez dans **Project Settings > Database** et récupérez votre **Connection String** (format URI).
+   - Assurez-vous d'utiliser le mode "Direct connection" (port 5432).
 
-4. **Lancer la base de données (si locale)**
-   Si vous utilisez le `docker-compose.yml` fourni :
-   ```bash
-   docker-compose up -d
-   ```
+4. **Configuration de l'environnement**
+   - Copiez `apps/api/.env.example` vers `apps/api/.env`.
+   - Remplacez la valeur de `DATABASE_URL` par votre chaîne de connexion Supabase.
+   - Copiez `apps/web/.env.example` vers `apps/web/.env.local`.
 
-5. **Appliquer les migrations Prisma**
+5. **Appliquer le schéma à la base de données**
+   Depuis la racine :
    ```bash
    cd apps/api
-   npx prisma migrate dev
+   npx prisma db push
    ```
 
 ## 🏎️ Lancer le projet en développement
@@ -63,7 +66,7 @@ L'application sera disponible sur :
 Nous avons récemment implémenté une charte graphique moderne en "Black & White" avec des accents tricolores Maliens. Le design se veut premium, dynamique et épuré.
 
 ## 👥 Collaboration
-1. Créez une branche pour votre fonctionnalité : `git checkout -b feature/ma-feature`
+1. Créez une branche pour votre fonctionnalité : `git checkout -b suite-v1`
 2. Commitez vos changements : `git commit -m 'feat: ajout de ...'`
-3. Pushez vers votre branche : `git push origin feature/ma-feature`
+3. Pushez vers votre branche : `git push origin suite-v1`
 4. Ouvrez une Pull Request.
