@@ -71,6 +71,18 @@ export const employerApi = {
         fetchAPI<any[]>('/employers/me', {
             headers: { Authorization: `Bearer ${token}` },
         }),
+    uploadLogo: async (token: string, file: File): Promise<any> => {
+        const form = new FormData();
+        form.append('file', file);
+        const res = await fetch(`${API_URL}/employers/me/logo`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: form,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || 'Erreur upload logo');
+        return data;
+    },
 };
 
 export const documentsApi = {
@@ -99,4 +111,54 @@ export const documentsApi = {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         }),
+
+    /** Download a document securely via proxy endpoint */
+    download: async (token: string, id: string, name: string) => {
+        const res = await fetch(`${API_URL}/documents/${id}/download`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.message || 'Erreur lors du téléchargement');
+        }
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name; // Force specific file name
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    },
+};
+
+export const profileApi = {
+    get: (token: string) => fetchAPI<any>('/profile/me', { headers: { Authorization: `Bearer ${token}` } }),
+    update: (token: string, data: any) =>
+        fetchAPI<any>('/profile/me', { method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) }),
+    addExperience: (token: string, data: any) =>
+        fetchAPI<any>('/profile/me/experiences', { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) }),
+    removeExperience: (token: string, id: string) =>
+        fetchAPI<any>(`/profile/me/experiences/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+    addEducation: (token: string, data: any) =>
+        fetchAPI<any>('/profile/me/educations', { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) }),
+    removeEducation: (token: string, id: string) =>
+        fetchAPI<any>(`/profile/me/educations/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+    addSkill: (token: string, data: any) =>
+        fetchAPI<any>('/profile/me/skills', { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(data) }),
+    removeSkill: (token: string, id: string) =>
+        fetchAPI<any>(`/profile/me/skills/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+    uploadAvatar: async (token: string, file: File): Promise<any> => {
+        const form = new FormData();
+        form.append('file', file);
+        const res = await fetch(`${API_URL}/profile/me/avatar`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: form,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || 'Erreur upload avatar');
+        return data;
+    },
 };

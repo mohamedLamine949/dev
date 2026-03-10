@@ -4,9 +4,13 @@ import {
     StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
 
-export default function LoginScreen({ onGoRegister }: { onGoRegister: () => void }) {
+export default function LoginScreen() {
     const { login } = useAuth();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -58,7 +62,7 @@ export default function LoginScreen({ onGoRegister }: { onGoRegister: () => void
                     )}
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={onGoRegister} style={styles.link}>
+                <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.link}>
                     <Text style={styles.linkText}>Pas encore de compte ? <Text style={styles.linkBold}>S&apos;inscrire</Text></Text>
                 </TouchableOpacity>
             </View>

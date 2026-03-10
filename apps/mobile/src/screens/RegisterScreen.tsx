@@ -1,22 +1,30 @@
 import React, { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity,
-    StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, ScrollView,
+    StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert, ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
 
-export default function RegisterScreen({ onGoLogin }: { onGoLogin: () => void }) {
+export default function RegisterScreen() {
     const { register } = useAuth();
-    const [form, setForm] = useState({
-        firstName: '', lastName: '', email: '', phone: '',
-        password: '', country: 'Mali', role: 'CANDIDATE' as 'CANDIDATE' | 'RECRUITER',
-    });
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+    // Form state
+    const [phone, setPhone] = useState('');
+    const [password, setPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [country, setCountry] = useState('Mali');
+    const [email, setEmail] = useState('');
+    const [role, setRole] = useState<'CANDIDATE' | 'RECRUITER'>('CANDIDATE');
+
     const [loading, setLoading] = useState(false);
 
-    const update = (key: string, value: string) => setForm(prev => ({ ...prev, [key]: value }));
-
     const handleRegister = async () => {
-        if (!form.firstName || !form.lastName || !form.phone || !form.password || !form.country) {
+        if (!firstName || !lastName || !phone || !password || !country) {
             Alert.alert('Erreur', 'Veuillez remplir tous les champs obligatoires (Prénom, Nom, Téléphone, Pays, Mot de passe)');
             return;
         }
@@ -39,39 +47,46 @@ export default function RegisterScreen({ onGoLogin }: { onGoLogin: () => void })
 
                     <View style={styles.row}>
                         <TextInput style={[styles.input, styles.half]} placeholder="Prénom" placeholderTextColor="#9ca3af"
-                            value={form.firstName} onChangeText={(v: string) => update('firstName', v)} />
+                            value={firstName} onChangeText={setFirstName} />
                         <TextInput style={[styles.input, styles.half]} placeholder="Nom" placeholderTextColor="#9ca3af"
-                            value={form.lastName} onChangeText={(v: string) => update('lastName', v)} />
+                            value={lastName} onChangeText={setLastName} />
                     </View>
-                    <TextInput style={styles.input} placeholder="Téléphone" placeholderTextColor="#9ca3af"
-                        value={form.phone} onChangeText={(v: string) => update('phone', v)} keyboardType="phone-pad" />
-                    <TextInput style={styles.input} placeholder="Email (optionnel)" placeholderTextColor="#9ca3af"
-                        value={form.email} onChangeText={(v: string) => update('email', v)} keyboardType="email-address" autoCapitalize="none" />
-                    <TextInput style={styles.input} placeholder="Pays" placeholderTextColor="#9ca3af"
-                        value={form.country} onChangeText={(v: string) => update('country', v)} />
+                    <TextInput style={styles.input} placeholder="Téléphone (+223...)" placeholderTextColor="#9ca3af"
+                        value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+                    <TextInput style={styles.input} placeholder="Email (Optionnel)" placeholderTextColor="#9ca3af"
+                        value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
                     <TextInput style={styles.input} placeholder="Mot de passe" placeholderTextColor="#9ca3af"
-                        value={form.password} onChangeText={(v: string) => update('password', v)} secureTextEntry />
+                        value={password} onChangeText={setPassword} secureTextEntry />
+
+                    <Text style={styles.roleLabel}>Pays de résidence</Text>
+                    <TextInput style={styles.input} placeholder="Ex: Mali, France, Canada..." placeholderTextColor="#9ca3af"
+                        value={country} onChangeText={setCountry} />
 
                     <Text style={styles.roleLabel}>Je suis un(e)</Text>
                     <View style={styles.roleRow}>
-                        {(['CANDIDATE', 'RECRUITER'] as const).map(role => (
-                            <TouchableOpacity
-                                key={role}
-                                style={[styles.roleBtn, form.role === role && styles.roleBtnActive]}
-                                onPress={() => update('role', role)}
-                            >
-                                <Text style={[styles.roleBtnText, form.role === role && styles.roleBtnTextActive]}>
-                                    {role === 'CANDIDATE' ? '👤 Candidat' : '🏢 Recruteur'}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                        <TouchableOpacity
+                            style={[styles.roleBtn, role === 'CANDIDATE' && styles.roleBtnActive]}
+                            onPress={() => setRole('CANDIDATE')}
+                        >
+                            <Text style={[styles.roleBtnText, role === 'CANDIDATE' && styles.roleBtnTextActive]}>
+                                👤 Candidat
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.roleBtn, role === 'RECRUITER' && styles.roleBtnActive]}
+                            onPress={() => setRole('RECRUITER')}
+                        >
+                            <Text style={[styles.roleBtnText, role === 'RECRUITER' && styles.roleBtnTextActive]}>
+                                🏢 Recruteur
+                            </Text>
+                        </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
                         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Créer mon compte</Text>}
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={onGoLogin} style={styles.link}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.link}>
                         <Text style={styles.linkText}>Déjà un compte ? <Text style={styles.linkBold}>Se connecter</Text></Text>
                     </TouchableOpacity>
                 </View>

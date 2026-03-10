@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -13,14 +11,11 @@ import { ApplicationsModule } from './applications/applications.module';
 import { AdminModule } from './admin/admin.module';
 import { EmployerModule } from './employers/employer.module';
 import { DocumentsModule } from './documents/documents.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads',
-    }),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -30,6 +25,7 @@ import { DocumentsModule } from './documents/documents.module';
     AdminModule,
     EmployerModule,
     DocumentsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

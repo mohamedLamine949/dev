@@ -25,14 +25,24 @@ export class AdminController {
         return this.adminService.toggleUserSuspension(id, isSuspended);
     }
 
+    @Get('users/:id')
+    getUserDetail(@Param('id') id: string) {
+        return this.adminService.getUserDetail(id);
+    }
+
     @Get('employers')
     getEmployers(@Query() query: any) {
         return this.adminService.getEmployers(query);
     }
 
     @Patch('employers/:id/verify')
-    verifyEmployer(@Param('id') id: string, @Body('isVerified') isVerified: boolean) {
-        return this.adminService.verifyEmployer(id, isVerified);
+    verifyEmployer(@Param('id') id: string, @Body('status') status: string, @Body('note') note?: string) {
+        return this.adminService.verifyEmployer(id, status, note);
+    }
+
+    @Get('employers/:id')
+    getEmployerDetail(@Param('id') id: string) {
+        return this.adminService.getEmployerDetail(id);
     }
 
     @Get('jobs')
@@ -43,5 +53,10 @@ export class AdminController {
     @Patch('jobs/:id/status')
     updateJobStatus(@Param('id') id: string, @Body('status') status: string) {
         return this.adminService.updateJobStatus(id, status);
+    }
+
+    @Get('jobs/:id')
+    getJobDetail(@Param('id') id: string) {
+        return this.adminService.getJobDetail(id);
     }
 }

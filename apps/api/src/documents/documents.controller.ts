@@ -1,11 +1,13 @@
 import {
-    Controller, Get, Post, Delete, Param, Request,
-    UseGuards, UseInterceptors, UploadedFile, BadRequestException,
+    Controller, Get, Post, Delete, Param, Request, Res,
+    UseGuards, UseInterceptors, UploadedFile, BadRequestException, ForbiddenException, NotFoundException
 } from '@nestjs/common';
+import { Response } from 'express';
+import { createReadStream } from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, unlinkSync } from 'fs';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -74,6 +76,8 @@ export class DocumentsController {
 
         const category = req.body?.category as DocumentCategory;
         if (!DOCUMENT_CATEGORIES.includes(category)) {
+            // Remove the file that multer just saved
+            if (existsSync(file.path)) unlinkSync(file.path);
             throw new BadRequestException(`Catégorie invalide. Choisissez parmi: ${DOCUMENT_CATEGORIES.join(', ')}`);
         }
 
@@ -83,7 +87,12 @@ export class DocumentsController {
         });
         if (existing) {
             await this.prisma.document.delete({ where: { id: existing.id } });
-            // Note: in production, also delete the file from S3/storage
+
+            // Delete the old file from disk
+            const oldFilePath = join(process.cwd(), existing.s3Key);
+            if (existsSync(oldFilePath)) {
+                unlinkSync(oldFilePath);
+            }
         }
 
         return this.prisma.document.create({
@@ -107,6 +116,64 @@ export class DocumentsController {
             throw new BadRequestException('Document introuvable ou accès refusé');
         }
         await this.prisma.document.delete({ where: { id } });
+
+        // Delete the physical file
+        const filePath = join(process.cwd(), doc.s3Key);
+        if (existsSync(filePath)) {
+            unlinkSync(filePath);
+        }
+
         return { success: true };
+    }
+
+    /** GET /api/documents/:id/download — Securely download a file */
+    @UseGuards(JwtAuthGuard)
+    @Get(':id/download')
+    async download(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
+        const doc = await this.prisma.document.findUnique({ where: { id } });
+        if (!doc) throw new NotFoundException('Document introuvable');
+
+        // Logic 1: You are the owner
+        let hasAccess = doc.userId === req.user.id;
+
+        // Logic 2: You are Admin
+        if (!hasAccess && req.user.role === 'ADMIN') {
+            hasAccess = true;
+        }
+
+        // Logic 3: You are a Recruiter and this document is attached to an application for your company
+        if (!hasAccess && req.user.role === 'RECRUITER') {
+            const hasApplication = await this.prisma.applicationDoc.findFirst({
+                where: {
+                    documentId: id,
+                    application: {
+                        job: {
+                            employer: {
+                                members: {
+                                    some: { userId: req.user.id }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            if (hasApplication) hasAccess = true;
+        }
+
+        if (!hasAccess) {
+            throw new ForbiddenException('Vous n\'avez pas accès à ce document.');
+        }
+
+        const filePath = join(process.cwd(), doc.s3Key);
+        if (!existsSync(filePath)) {
+            throw new NotFoundException('Fichier physique introuvable sur le serveur.');
+        }
+
+        const fileStream = createReadStream(filePath);
+        res.set({
+            'Content-Type': doc.mimeType,
+            'Content-Disposition': `inline; filename="${doc.name}"`, // inline allows viewing PDFs in browser instead of forcing download
+        });
+        fileStream.pipe(res);
     }
 }

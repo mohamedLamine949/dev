@@ -138,7 +138,7 @@ export const jobsApi = {
 };
 
 export const appsApi = {
-    apply: (token: string, jobId: string, dto: { coverLetter?: string; introMessage?: string }) =>
+    apply: (token: string, jobId: string, dto: { coverLetter?: string; introMessage?: string; applicationDocs?: { documentId: string; category: string }[] }) =>
         fetchAPI(`/jobs/${jobId}/apply`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
@@ -161,4 +161,31 @@ export const employerApi = {
         }),
 };
 
+export const documentsApi = {
+    list: (token: string) => fetchAPI<any[]>('/documents', { headers: { Authorization: `Bearer ${token}` } }),
 
+    upload: async (token: string, file: { uri: string; name: string; type: string }, category: string) => {
+        const formData = new FormData();
+        formData.append('file', {
+            uri: file.uri,
+            name: file.name,
+            type: file.type,
+        } as any);
+        formData.append('category', category);
+
+        const res = await fetch(`${API_URL}/documents/upload`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                // Do not set Content-Type to multipart/form-data manually, fetch will do it with the correct boundary
+            },
+            body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Erreur lors de l\'upload');
+        return data;
+    },
+
+    remove: (token: string, id: string) => fetchAPI(`/documents/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+};

@@ -3,9 +3,12 @@ import {
     View, Text, TouchableOpacity, StyleSheet, ScrollView,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 
 export default function HomeScreen() {
     const { user, logout } = useAuth();
+    const navigation = useNavigation<BottomTabNavigationProp<any>>();
 
     if (!user) return null;
 
@@ -13,14 +16,15 @@ export default function HomeScreen() {
     const roleColor = user.role === 'RECRUITER' ? '#2563eb' : user.role === 'ADMIN' ? '#7c3aed' : '#16a34a';
 
     const candidateActions = [
-        { icon: '💼', label: 'Offres d\'emploi', desc: 'Parcourir les offres' },
-        { icon: '📄', label: 'Mon CV', desc: 'Gérer mon profil' },
-        { icon: '📋', label: 'Candidatures', desc: 'Suivre mes dossiers' },
+        { icon: '💼', label: 'Offres d\'emploi', desc: 'Parcourir les offres', route: 'MaliLink Jobs' },
+        { icon: '📄', label: 'Mon CV', desc: 'Gérer mon profil', route: 'Mon Profil' },
+        { icon: '📋', label: 'Candidatures', desc: 'Suivre mes dossiers', route: 'Mes Candidatures' },
+        { icon: '📁', label: 'Documents', desc: 'Coffre-fort', route: 'Coffre-fort' },
     ];
+    // Recruiters don't have standard mobile tabs built yet for "Publier", so we default them to Jobs mostly.
     const recruiterActions = [
-        { icon: '➕', label: 'Publier une offre', desc: 'Créer une annonce' },
-        { icon: '📢', label: 'Mes offres', desc: 'Gérer mes annonces' },
-        { icon: '📬', label: 'Candidatures', desc: 'Examiner les dossiers' },
+        { icon: '📢', label: 'Les offres', desc: 'Parcourir les offres', route: 'MaliLink Jobs' },
+        { icon: '📄', label: 'Mon Profil', desc: 'Gérer mon compte', route: 'Mon Profil' },
     ];
     const actions = user.role === 'RECRUITER' ? recruiterActions : candidateActions;
 
@@ -51,7 +55,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Actions rapides</Text>
             <View style={styles.actionsGrid}>
                 {actions.map(a => (
-                    <TouchableOpacity key={a.label} style={styles.actionCard}>
+                    <TouchableOpacity key={a.label} style={styles.actionCard} onPress={() => navigation.navigate(a.route)}>
                         <Text style={styles.actionIcon}>{a.icon}</Text>
                         <Text style={styles.actionLabel}>{a.label}</Text>
                         <Text style={styles.actionDesc}>{a.desc}</Text>

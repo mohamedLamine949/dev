@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+import { NotificationsService } from '../notifications/notifications.service';
+
 // --------------- DTOs ---------------
 export interface ApplicationDocDto {
     category: string;   // e.g. 'CV', 'DIPLOME'
@@ -33,10 +35,18 @@ export interface ApplicationFilters {
 // --------------- Service ---------------
 @Injectable()
 export class ApplicationsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private notifications: NotificationsService
+    ) { }
 
     /** Candidate applies to a job */
     async apply(userId: string, jobId: string, dto: ApplyDto) {
+        const candidateUser = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (candidateUser?.role !== 'CANDIDATE') {
+            throw new ForbiddenException('Seuls les candidats peuvent postuler aux offres.');
+        }
+
         // Check the job exists and is published
         const job = await this.prisma.job.findUnique({
             where: { id: jobId },
@@ -101,6 +111,20 @@ export class ApplicationsService {
 
         // Increment job application count
         await this.prisma.job.update({ where: { id: jobId }, data: { applicationCount: { increment: 1 } } });
+
+        // -- Notify Recruiters --
+        const employerMembers = await this.prisma.employerMember.findMany({
+            where: { employerId: job.employerId }
+        });
+        for (const member of employerMembers) {
+            await this.notifications.create(
+                member.userId,
+                'NEW_APPLICATION',
+                'Nouvelle candidature reçue',
+                `${candidateUser?.firstName} ${candidateUser?.lastName} a postulé à l'offre "${job.title}".`,
+                `/dashboard/recruiter/applications?job=${job.id}`
+            );
+        }
 
         return application;
     }
@@ -185,10 +209,30 @@ export class ApplicationsService {
             throw new BadRequestException(`Statut invalide. Valeurs acceptées : ${validStatuses.join(', ')}`);
         }
 
-        return this.prisma.application.update({
+        const updated = await this.prisma.application.update({
             where: { id: applicationId },
             data: { status: dto.status },
         });
+
+        // -- Notify Candidate --
+        const statusMap: Record<string, string> = {
+            REVIEWED: 'a été consultée',
+            SHORTLISTED: 'est présélectionnée',
+            INTERVIEW: 'a déclenché un entretien',
+            ACCEPTED: 'est acceptée ! 🎉',
+            REJECTED: 'n\'a malheureusement pas été retenue'
+        };
+        if (statusMap[dto.status]) {
+            await this.notifications.create(
+                application.userId,
+                'STATUS_UPDATE',
+                'Mise à jour de votre candidature',
+                `Votre candidature pour "${application.job.title}" ${statusMap[dto.status]}.`,
+                `/dashboard/applications/${application.id}`
+            );
+        }
+
+        return updated;
     }
 
     /** Get messages for an application (both candidate and recruiter) */
@@ -229,7 +273,7 @@ export class ApplicationsService {
         const isRecruiter = application.job.employer.members.some((m: any) => m.userId === userId);
         if (!isCandidate && !isRecruiter) throw new ForbiddenException('Accès non autorisé');
 
-        return this.prisma.message.create({
+        const message = await this.prisma.message.create({
             data: {
                 applicationId,
                 senderId: userId,
@@ -240,6 +284,31 @@ export class ApplicationsService {
             },
             include: { sender: { select: { firstName: true, lastName: true, role: true } } },
         });
+
+        // -- Notify the recipient --
+        if (isCandidate) {
+            // Received by Recruiter(s)
+            application.job.employer.members.forEach(member => {
+                this.notifications.create(
+                    member.userId,
+                    'NEW_MESSAGE',
+                    'Nouveau message (Candidat)',
+                    `Un candidat vous a envoyé un message concernant "${application.job.title}".`,
+                    `/dashboard/applications/${application.id}`
+                );
+            });
+        } else {
+            // Received by Candidate
+            await this.notifications.create(
+                application.userId,
+                'NEW_MESSAGE',
+                'Nouveau message (Recruteur)',
+                `Vous avez reçu un message du recruteur pour l'offre "${application.job.title}".`,
+                `/dashboard/applications/${application.id}`
+            );
+        }
+
+        return message;
     }
 
     /** Get a single application detail */
@@ -254,6 +323,9 @@ export class ApplicationsService {
                 messages: {
                     include: { sender: { select: { firstName: true, lastName: true, role: true } } },
                     orderBy: { createdAt: 'asc' },
+                },
+                documents: {
+                    include: { document: true },
                 },
             },
         });

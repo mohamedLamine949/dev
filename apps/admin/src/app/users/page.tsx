@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { adminApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 
 interface User {
     id: string;
@@ -17,7 +18,7 @@ interface User {
 }
 
 export default function UsersPage() {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const [users, setUsers] = useState<User[]>([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -25,10 +26,9 @@ export default function UsersPage() {
     const [page, setPage] = useState(1);
 
     const fetchUsers = useCallback(async () => {
-        if (!token) return;
         setLoading(true);
         try {
-            const data = await adminApi.getUsers(token, `page=${page}&search=${search}`);
+            const data = await adminApi.getUsers(token!, `page=${page}&search=${search}&role=CANDIDATE`);
             setUsers(data.users);
             setTotal(data.total);
         } catch (err) {
@@ -36,7 +36,7 @@ export default function UsersPage() {
         } finally {
             setLoading(false);
         }
-    }, [token, page, search]);
+    }, [token, user, page, search]);
 
     useEffect(() => {
         fetchUsers();
@@ -60,14 +60,14 @@ export default function UsersPage() {
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">🔍</span>
                         <input
                             type="text"
-                            placeholder="Rechercher un utilisateur (Nom, Email, Tel)..."
+                            placeholder="Rechercher un candidat (Nom, Email, Tel)..."
                             value={search}
                             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                             className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 transition-all font-medium"
                         />
                     </div>
                     <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                        {total} Utilisateurs trouvés
+                        {total} Candidats trouvés
                     </div>
                 </div>
 
@@ -75,7 +75,7 @@ export default function UsersPage() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-white/5 bg-white/[0.01]">
-                                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Utilisateur</th>
+                                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Candidat</th>
                                 <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Contact</th>
                                 <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Rôle</th>
                                 <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Statut</th>
@@ -84,9 +84,9 @@ export default function UsersPage() {
                         </thead>
                         <tbody className="divide-y divide-white/5">
                             {loading ? (
-                                <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-500 animate-pulse font-medium">Chargement de la base utilisateurs...</td></tr>
+                                <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-500 animate-pulse font-medium">Chargement de la base candidats...</td></tr>
                             ) : users.length === 0 ? (
-                                <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-500 font-medium">Aucun utilisateur trouvé</td></tr>
+                                <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-500 font-medium">Aucun candidat trouvé</td></tr>
                             ) : users.map((u) => (
                                 <tr key={u.id} className="hover:bg-white/[0.02] transition-colors group">
                                     <td className="px-6 py-4">
@@ -120,7 +120,13 @@ export default function UsersPage() {
                                             </span>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 text-right">
+                                    <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                                        <Link
+                                            href={`/users/${u.id}`}
+                                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 transition-all font-bold"
+                                        >
+                                            👁️ Détails
+                                        </Link>
                                         <button
                                             onClick={() => handleToggleSuspension(u)}
                                             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${u.isSuspended ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'}`}

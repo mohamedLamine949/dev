@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { adminApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 
 interface Job {
     id: string;
@@ -14,13 +15,13 @@ interface Job {
 }
 
 export default function JobsModerationPage() {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'PUBLISHED' | 'DRAFT' | 'CLOSED'>('PUBLISHED');
 
     const fetchJobs = useCallback(async () => {
-        if (!token) return;
+        if (!token || !user || user?.role !== 'ADMIN') return;
         setLoading(true);
         try {
             const data = await adminApi.getJobs(token, `status=${filter}`);
@@ -30,7 +31,7 @@ export default function JobsModerationPage() {
         } finally {
             setLoading(false);
         }
-    }, [token, filter]);
+    }, [token, user, filter]);
 
     useEffect(() => {
         fetchJobs();
@@ -88,13 +89,19 @@ export default function JobsModerationPage() {
                                     <td className="px-6 py-4 text-xs text-slate-500 font-bold uppercase tracking-widest">
                                         {new Date(j.createdAt).toLocaleDateString()}
                                     </td>
-                                    <td className="px-6 py-4 text-right space-x-2">
+                                    <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                                        <Link
+                                            href={`/jobs/${j.id}`}
+                                            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 transition-all font-bold"
+                                        >
+                                            👁️ Voir
+                                        </Link>
                                         {filter === 'PUBLISHED' && (
                                             <button
                                                 onClick={() => handleUpdateStatus(j.id, 'CLOSED')}
                                                 className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-bold hover:bg-red-500/20 transition-all uppercase tracking-widest"
                                             >
-                                                Suspendre / Clôturer
+                                                Suspendre
                                             </button>
                                         )}
                                         {filter === 'DRAFT' && (
@@ -102,7 +109,7 @@ export default function JobsModerationPage() {
                                                 onClick={() => handleUpdateStatus(j.id, 'PUBLISHED')}
                                                 className="px-4 py-2 bg-green-600/10 border border-green-600/20 text-green-500 rounded-xl text-xs font-bold hover:bg-green-600/20 transition-all uppercase tracking-widest"
                                             >
-                                                Valider & Publier
+                                                Valider
                                             </button>
                                         )}
                                     </td>

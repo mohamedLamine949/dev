@@ -136,11 +136,25 @@ export class ProfileService {
                 experiences: true,
                 educations: true,
                 skills: true,
-                user: { select: { firstName: true, lastName: true, country: true, region: true, createdAt: true } },
+                user: { select: { firstName: true, lastName: true, country: true, region: true, createdAt: true, avatarS3Key: true } },
             },
         });
         if (!profile) throw new NotFoundException('Profil introuvable');
         return { ...profile, completionScore: this.calculateScore(profile) };
+    }
+
+    // ---- Avatar ----
+    async getAvatarUrl(userId: string) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { avatarS3Key: true } });
+        return user?.avatarS3Key;
+    }
+
+    async updateAvatar(userId: string, avatarUrl: string) {
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: { avatarS3Key: avatarUrl },
+            select: { id: true, email: true, firstName: true, lastName: true, role: true, avatarS3Key: true }
+        });
     }
 
     // ---- Helpers ----

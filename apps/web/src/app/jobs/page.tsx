@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { motion, Variants } from 'framer-motion';
+import { Search, MapPin, Building, Activity, CalendarDays, ExternalLink } from 'lucide-react';
 
 const SECTORS = ['Agriculture', 'Banque / Finance', 'BTP', 'Commerce', 'Education', 'Energie', 'IT / Télécoms', 'Mines', 'ONG / International', 'Santé', 'Sécurité / Défense', 'Transport / Logistique'];
 const JOB_TYPES = ['CDI', 'CDD', 'STAGE', 'CONCOURS', 'VOLONTARIAT', 'APPRENTISSAGE'];
@@ -44,6 +46,16 @@ const typeLabels: Record<string, string> = {
 };
 
 const selectCls = "bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition";
+
+const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+};
 
 export default function JobsPage() {
     const { user } = useAuth();
@@ -153,60 +165,68 @@ export default function JobsPage() {
                         <p className="text-gray-500 text-sm mt-2">Essayez d&apos;ajuster vos filtres</p>
                     </div>
                 ) : (
-                    <div className="space-y-2">
+                    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-3">
                         {jobs.map(job => {
                             const dl = formatDeadline(job.deadline);
                             const regions = (() => { try { return JSON.parse(job.regions); } catch { return [job.regions]; } })();
                             return (
-                                <Link key={job.id} href={`/jobs/${job.id}`}
-                                    className="group flex items-start justify-between gap-4 px-5 py-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                            <span className={`text-[11px] font-semibold border rounded-full px-2 py-0.5 ${typeColors[job.type] || 'text-gray-300 border-white/10'}`}>
-                                                {typeLabels[job.type] || job.type}
-                                            </span>
-                                            {job.isDiasporaOpen && <span className="text-[11px] text-gray-400 border border-white/10 rounded-full px-2 py-0.5">🌍 Diaspora</span>}
-                                            {dl.urgent && <span className="text-[11px] text-red-400 border border-red-500/20 rounded-full px-2 py-0.5 animate-pulse">{dl.label}</span>}
+                                <motion.div key={job.id} variants={itemVariants}>
+                                    <Link href={`/jobs/${job.id}`}
+                                        className="group glass-card glass-card-hover flex items-start justify-between gap-4 px-6 py-5 block rounded-2xl">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                                <span className={`text-[11px] font-semibold border rounded-full px-2.5 py-0.5 ${typeColors[job.type] || 'text-gray-300 border-white/10'}`}>
+                                                    {typeLabels[job.type] || job.type}
+                                                </span>
+                                                {job.isDiasporaOpen && <span className="text-[11px] text-gray-400 border border-white/10 rounded-full px-2.5 py-0.5">🌍 Diaspora</span>}
+                                                {dl.urgent && <span className="text-[11px] text-red-400 border border-red-500/20 rounded-full px-2.5 py-0.5 animate-pulse">{dl.label}</span>}
+                                            </div>
+                                            <h2 className="text-lg font-semibold text-white group-hover:text-[#14B53A] transition-colors truncate">{job.title}</h2>
+
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mt-2">
+                                                <span className="flex items-center gap-1.5"><Building size={14} className="text-gray-400" /> {job.employer.name}{job.employer.isVerified && <span className="text-[#14B53A]">✓</span>}</span>
+                                                <span className="flex items-center gap-1.5"><Activity size={14} className="text-gray-400" /> {job.sector}</span>
+                                                <span className="flex items-center gap-1.5"><MapPin size={14} className="text-gray-400" /> {regions.join(', ')}</span>
+                                            </div>
                                         </div>
-                                        <h2 className="text-white font-semibold group-hover:text-gray-100 transition truncate">{job.title}</h2>
-                                        <p className="text-gray-500 text-sm mt-0.5">
-                                            {job.employer.name}
-                                            {job.employer.isVerified && <span className="ml-1.5 text-[#14B53A]">✓</span>}
-                                            {' · '}{job.sector}{' · '}{regions.join(', ')}
-                                        </p>
-                                    </div>
-                                    <div className="text-right flex-shrink-0">
-                                        {(job.salaryMin || job.salaryMax) && (
-                                            <p className="text-white text-sm font-medium">
-                                                {job.salaryMin?.toLocaleString()} – {job.salaryMax?.toLocaleString()} FCFA
-                                            </p>
-                                        )}
-                                        <p className={`text-xs mt-0.5 ${dl.urgent ? 'text-red-400' : 'text-gray-600'}`}>
-                                            {dl.label === 'Demain !' ? '⚡ ' : ''}J-{Math.ceil((new Date(job.deadline).getTime() - Date.now()) / 86400000)}
-                                        </p>
-                                        <p className="text-xs text-gray-700 mt-0.5">{job.applicationCount} candidature{job.applicationCount !== 1 ? 's' : ''}</p>
-                                    </div>
-                                </Link>
+                                        <div className="text-right flex-shrink-0 flex flex-col justify-between items-end h-[88px]">
+                                            <div className="p-2 rounded-full border border-white/10 text-gray-400 group-hover:text-white group-hover:border-white/30 group-hover:bg-white/5 transition-all">
+                                                <ExternalLink size={16} />
+                                            </div>
+                                            <div className="text-right">
+                                                {(job.salaryMin || job.salaryMax) && (
+                                                    <p className="text-white text-sm font-medium mb-1">
+                                                        {job.salaryMin?.toLocaleString()} – {job.salaryMax?.toLocaleString()} FCFA
+                                                    </p>
+                                                )}
+                                                <p className="text-xs text-gray-600 flex items-center justify-end gap-1"><CalendarDays size={12} /> Expir. : {new Date(job.deadline).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                </motion.div>
                             );
                         })}
-                    </div>
+                    </motion.div>
                 )}
 
+
                 {/* Pagination */}
-                {total > 20 && (
-                    <div className="flex justify-center items-center gap-4 mt-10">
-                        <button disabled={page === 1} onClick={() => setPage(p => p - 1)}
-                            className="px-4 py-2 rounded-lg border border-white/10 text-white text-sm disabled:opacity-30 hover:bg-white/[0.05] transition">
-                            ← Précédent
-                        </button>
-                        <span className="text-gray-500 text-sm">Page {page} / {Math.ceil(total / 20)}</span>
-                        <button disabled={page >= Math.ceil(total / 20)} onClick={() => setPage(p => p + 1)}
-                            className="px-4 py-2 rounded-lg border border-white/10 text-white text-sm disabled:opacity-30 hover:bg-white/[0.05] transition">
-                            Suivant →
-                        </button>
-                    </div>
-                )}
-            </div>
-        </div>
+                {
+                    total > 20 && (
+                        <div className="flex justify-center items-center gap-4 mt-10">
+                            <button disabled={page === 1} onClick={() => setPage(p => p - 1)}
+                                className="px-4 py-2 rounded-lg border border-white/10 text-white text-sm disabled:opacity-30 hover:bg-white/[0.05] transition">
+                                ← Précédent
+                            </button>
+                            <span className="text-gray-500 text-sm">Page {page} / {Math.ceil(total / 20)}</span>
+                            <button disabled={page >= Math.ceil(total / 20)} onClick={() => setPage(p => p + 1)}
+                                className="px-4 py-2 rounded-lg border border-white/10 text-white text-sm disabled:opacity-30 hover:bg-white/[0.05] transition">
+                                Suivant →
+                            </button>
+                        </div>
+                    )
+                }
+            </div >
+        </div >
     );
 }

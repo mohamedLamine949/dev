@@ -4,18 +4,43 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import NotificationBell from '@/components/NotificationBell';
+import { motion, Variants } from 'framer-motion';
+import {
+    Briefcase, User, Lock, FileText,
+    PlusCircle, Building, Megaphone, Inbox,
+    Users, Layers, BarChart3
+} from 'lucide-react';
 
 const roleLabels: Record<string, string> = { RECRUITER: 'Recruteur', ADMIN: 'Admin', CANDIDATE: 'Candidat' };
 
-function ActionCard({ title, desc, icon, href }: { title: string; desc: string; icon: string; href: string }) {
+function ActionCard({ title, desc, icon, href }: { title: string; desc: string; icon: React.ReactNode; href: string }) {
     return (
-        <Link href={href} className="group rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 hover:bg-white/[0.05] hover:border-white/[0.12] transition-all block">
-            <div className="text-2xl mb-3">{icon}</div>
-            <h3 className="font-semibold text-white text-sm">{title}</h3>
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed">{desc}</p>
+        <Link href={href} className="group glass-card glass-card-hover rounded-xl p-5 block relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-10 transition duration-500 scale-150 rotate-12">
+                {icon}
+            </div>
+            <div className="text-2xl mb-3 text-white/70 group-hover:text-[#14B53A] transition-colors duration-300">
+                {icon}
+            </div>
+            <h3 className="font-semibold text-white text-sm relative z-10">{title}</h3>
+            <p className="text-xs text-gray-500 mt-1 leading-relaxed relative z-10">{desc}</p>
         </Link>
     );
 }
+
+const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: { staggerChildren: 0.1 }
+    }
+};
+
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+};
 
 export default function DashboardPage() {
     const { user, logout, loading } = useAuth();
@@ -45,10 +70,13 @@ export default function DashboardPage() {
                     <span className="text-white font-bold tracking-tight">MaliLink</span>
                     <span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
                 </Link>
-                <button onClick={() => { logout(); router.push('/login'); }}
-                    className="text-sm text-gray-500 hover:text-white transition">
-                    Déconnexion
-                </button>
+                <div className="flex items-center gap-4">
+                    <NotificationBell />
+                    <button onClick={() => { logout(); router.push('/login'); }}
+                        className="text-sm text-gray-500 hover:text-white transition">
+                        Déconnexion
+                    </button>
+                </div>
             </nav>
 
             <div className="max-w-4xl mx-auto px-4 py-10">
@@ -69,31 +97,36 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Action cards */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                >
                     {user.role === 'CANDIDATE' && (
                         <>
-                            <ActionCard icon="💼" title="Offres d'emploi" desc="Parcourir les offres disponibles" href="/jobs" />
-                            <ActionCard icon="📄" title="Mon Profil" desc="Compléter mon profil" href="/dashboard/profile" />
-                            <ActionCard icon="🔐" title="Mon Coffre-fort" desc="Gérer mes documents" href="/dashboard/documents" />
-                            <ActionCard icon="📋" title="Mes candidatures" desc="Suivre mes dossiers" href="/dashboard/applications" />
+                            <motion.div variants={itemVariants}><ActionCard icon={<Briefcase size={24} strokeWidth={1.5} />} title="Offres d'emploi" desc="Parcourir les offres" href="/jobs" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<User size={24} strokeWidth={1.5} />} title="Mon Profil" desc="Gérer mon CV & infos" href="/dashboard/profile" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Lock size={24} strokeWidth={1.5} />} title="Mon Coffre-fort" desc="Documents sécurisés" href="/dashboard/documents" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<FileText size={24} strokeWidth={1.5} />} title="Mes candidatures" desc="Suivre mes dossiers" href="/dashboard/applications" /></motion.div>
                         </>
                     )}
                     {user.role === 'RECRUITER' && (
                         <>
-                            <ActionCard icon="➕" title="Publier une offre" desc="Créer une nouvelle offre" href="/dashboard/recruiter/jobs/new" />
-                            <ActionCard icon="🏢" title="Mon Entreprise" desc="Gérer ma structure" href="/dashboard/recruiter/employer" />
-                            <ActionCard icon="📢" title="Mes offres" desc="Gérer mes annonces" href="/jobs" />
-                            <ActionCard icon="📬" title="Candidatures" desc="Examiner les dossiers" href="/dashboard/recruiter/applications" />
+                            <motion.div variants={itemVariants}><ActionCard icon={<PlusCircle size={24} strokeWidth={1.5} />} title="Publier une offre" desc="Créer une annonce" href="/dashboard/recruiter/jobs/new" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Building size={24} strokeWidth={1.5} />} title="Mon Entreprise" desc="Profil employeur" href="/dashboard/recruiter/employer" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Megaphone size={24} strokeWidth={1.5} />} title="Mes offres" desc="Gérer mes annonces" href="/jobs" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Inbox size={24} strokeWidth={1.5} />} title="Candidatures" desc="Examiner les dossiers" href="/dashboard/recruiter/applications" /></motion.div>
                         </>
                     )}
                     {user.role === 'ADMIN' && (
                         <>
-                            <ActionCard icon="👥" title="Utilisateurs" desc="Gérer les comptes" href="/admin/users" />
-                            <ActionCard icon="🗂️" title="Offres" desc="Modérer les annonces" href="/admin/jobs" />
-                            <ActionCard icon="📊" title="Statistiques" desc="Métriques de la plateforme" href="/admin/stats" />
+                            <motion.div variants={itemVariants}><ActionCard icon={<Users size={24} strokeWidth={1.5} />} title="Utilisateurs" desc="Gérer les comptes" href="/admin/users" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Layers size={24} strokeWidth={1.5} />} title="Offres" desc="Modérer les annonces" href="/admin/jobs" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<BarChart3 size={24} strokeWidth={1.5} />} title="Statistiques" desc="Métriques complètes" href="/admin/stats" /></motion.div>
                         </>
                     )}
-                </div>
+                </motion.div>
             </div>
         </div>
     );

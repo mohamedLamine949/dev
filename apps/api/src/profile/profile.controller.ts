@@ -1,7 +1,13 @@
 import {
-    Controller, Get, Patch, Post, Delete, Body, Param, UseGuards, Request,
+    Controller, Get, Patch, Post, Delete, Body, Param, UseGuards, Request, NotFoundException, Res, UseInterceptors, UploadedFile, BadRequestException
 } from '@nestjs/common';
+import { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { unlinkSync } from 'fs';
 import { ProfileService, UpdateProfileDto, ExperienceDto, EducationDto, SkillDto } from './profile.service';
+import { join, extname } from 'path';
+import { existsSync, createReadStream } from 'fs';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('profile')
@@ -59,6 +65,75 @@ export class ProfileController {
     @Delete('me/skills/:id')
     removeSkill(@Request() req: any, @Param('id') id: string) {
         return this.profileService.removeSkill(req.user.id, id);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('me/avatar')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: diskStorage({
+            destination: (_req, _file, cb) => cb(null, join(process.cwd(), 'uploads')),
+            filename: (_req, file, cb) => {
+                const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+                cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+            },
+        }),
+        limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+        fileFilter: (_req, file, cb) => {
+            if (['image/jpeg', 'image/png', 'image/jpg', 'image/webp'].includes(file.mimetype)) {
+                cb(null, true);
+            } else {
+                cb(new BadRequestException('Format non supporté. Utilisez JPG, PNG ou WEBP.'), false);
+            }
+        },
+    }))
+    async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Request() req: any) {
+        if (!file) throw new BadRequestException('Aucun fichier reçu');
+
+        const userId = req.user.id;
+        const oldAvatar = await this.profileService.getAvatarUrl(userId);
+        const avatarUrl = `/uploads/${file.filename}`;
+
+        const updatedUser = await this.profileService.updateAvatar(userId, avatarUrl);
+
+        // Delete old avatar physical file if exists
+        if (oldAvatar) {
+            const oldFilePath = join(process.cwd(), oldAvatar);
+            if (existsSync(oldFilePath)) {
+                try {
+                    unlinkSync(oldFilePath);
+                } catch (e) {
+                    console.error('Erreur supression ancien avatar:', e);
+                }
+            }
+        }
+
+        return updatedUser;
+    }
+
+    // ---- Avatar Image ----
+    @Get('/avatar/:userId')
+    async getAvatar(@Param('userId') userId: string, @Res() res: Response) {
+        const url = await this.profileService.getAvatarUrl(userId);
+        if (!url) {
+            throw new NotFoundException('Avatar non trouvé');
+        }
+
+        const filePath = join(process.cwd(), url);
+        if (!existsSync(filePath)) {
+            throw new NotFoundException('Fichier physique introuvable.');
+        }
+
+        const ext = extname(url).toLowerCase();
+        let mimeType = 'image/jpeg';
+        if (ext === '.png') mimeType = 'image/png';
+        if (ext === '.webp') mimeType = 'image/webp';
+
+        res.set({
+            'Content-Type': mimeType,
+            'Cache-Control': 'public, max-age=86400'
+        });
+        const fileStream = createReadStream(filePath);
+        fileStream.pipe(res);
     }
 
     // ---- Public profile ----

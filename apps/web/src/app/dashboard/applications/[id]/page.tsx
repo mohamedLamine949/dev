@@ -4,6 +4,8 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { documentsApi } from '@/lib/api';
+import NotificationBell from '@/components/NotificationBell';
 
 interface Message { id: string; content: string; type: string; summonDate?: string; summonLocation?: string; isRead: boolean; createdAt: string; sender: { firstName: string; lastName: string; role: string }; }
 interface ApplicationDetail {
@@ -11,6 +13,7 @@ interface ApplicationDetail {
     job: { id: string; title: string; type: string; sector: string; deadline: string; employer: { name: string } };
     user: { id: string; firstName: string; lastName: string; phone: string; email?: string; country: string };
     messages: Message[];
+    documents?: { documentId: string; document: { category: string; name: string; size: number } }[];
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; icon: string }> = {
@@ -30,6 +33,7 @@ export default function ApplicationDetailPage() {
     const [loading, setLoading] = useState(true);
     const [msgText, setMsgText] = useState('');
     const [sending, setSending] = useState(false);
+    const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
 
     const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
@@ -57,6 +61,18 @@ export default function ApplicationDetailPage() {
     if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex justify-center items-center"><div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /></div>;
     if (!app) return null;
 
+    const handleDownload = async (docId: string, name: string) => {
+        if (!token) return;
+        setDownloadingFile(docId);
+        try {
+            await documentsApi.download(token, docId, name);
+        } catch (err: any) {
+            alert(err.message || 'Erreur lors du téléchargement');
+        } finally {
+            setDownloadingFile(null);
+        }
+    };
+
     const st = STATUS_MAP[app.status] || STATUS_MAP.SENT;
 
     return (
@@ -69,7 +85,10 @@ export default function ApplicationDetailPage() {
                 <Link href="/" className="flex items-center gap-2">
                     <span className="text-white font-bold tracking-tight">MaliLink</span>
                 </Link>
-                <Link href="/dashboard/applications" className="text-sm text-gray-500 hover:text-white transition">← Mes candidatures</Link>
+                <div className="flex items-center gap-4">
+                    <NotificationBell />
+                    <Link href="/dashboard/applications" className="text-sm text-gray-500 hover:text-white transition">← Mes candidatures</Link>
+                </div>
             </nav>
 
             <div className="max-w-3xl mx-auto px-4 py-8 space-y-5">
@@ -91,6 +110,36 @@ export default function ApplicationDetailPage() {
                         <div className="mt-5 pt-5 border-t border-white/[0.07]">
                             <p className="text-xs text-gray-500 mb-2 font-medium">Votre lettre de motivation :</p>
                             <p className="text-gray-300 text-sm whitespace-pre-line leading-relaxed bg-white/[0.01] p-4 rounded-xl border border-white/[0.04]">{app.coverLetter}</p>
+                        </div>
+                    )}
+
+                    {/* Attached Documents */}
+                    {app.documents && app.documents.length > 0 && (
+                        <div className="mt-5 pt-5 border-t border-white/[0.07]">
+                            <p className="text-xs text-gray-500 mb-3 font-medium">Documents joints ({app.documents.length}) :</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {app.documents.map(d => {
+                                    const isDownloading = downloadingFile === d.documentId;
+                                    return (
+                                        <div key={d.documentId} className="flex items-center justify-between p-3 rounded-lg border border-white/[0.06] bg-white/[0.02]">
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm shrink-0">📄</div>
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-medium text-white truncate">{d.document.name}</p>
+                                                    <p className="text-[10px] text-gray-500">{d.document.category} · {(d.document.size / 1024 / 1024).toFixed(2)} MB</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleDownload(d.documentId, d.document.name)}
+                                                disabled={isDownloading}
+                                                className="ml-2 text-xs text-[#14B53A] hover:text-[#14B53A]/80 transition flex items-center gap-1 disabled:opacity-50"
+                                            >
+                                                {isDownloading ? '⏳' : '📥'}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     )}
                 </div>

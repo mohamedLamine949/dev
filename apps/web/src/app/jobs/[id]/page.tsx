@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { documentsApi } from '@/lib/api';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { MapPin, Building, Activity, Eye, Users, CheckCircle2, AlertCircle, FileText, Send } from 'lucide-react';
 
 interface Job {
     id: string; title: string; type: string; sector: string; regions: string;
@@ -15,18 +18,18 @@ interface Job {
     requiredDocs: { id: string; documentCategory: string; label: string; isOptional: boolean }[];
 }
 
+interface VaultDoc { id: string; name: string; category: string; }
+
 const EXP_MAP: Record<string, string> = { NONE: 'Aucune', '1_2': '1 à 2 ans', '3_5': '3 à 5 ans', PLUS_5: '+5 ans' };
 const TYPE_MAP: Record<string, string> = { CDI: 'CDI', CDD: 'CDD', STAGE: 'Stage', CONCOURS: 'Concours', VOLONTARIAT: 'Volontariat', APPRENTISSAGE: 'Apprentissage' };
 
-function formatDate(d: string) {
-    return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-}
-function daysLeft(deadline: string) {
-    return Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000);
-}
+function formatDate(d: string) { return new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); }
+function daysLeft(deadline: string) { return Math.ceil((new Date(deadline).getTime() - Date.now()) / 86400000); }
 
-const cardCls = "rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6";
+const cardCls = "glass-card rounded-2xl p-6";
 const rowCls = "flex justify-between items-center text-sm py-2 border-b border-white/[0.04] last:border-0";
+const pageVariants: Variants = { hidden: { opacity: 0, scale: 0.98 }, show: { opacity: 1, scale: 1, transition: { duration: 0.4 } } };
+const modalVariants: Variants = { hidden: { opacity: 0, scale: 0.95, y: 20 }, show: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 25, stiffness: 300 } }, exit: { opacity: 0, scale: 0.95, y: 20 } };
 
 export default function JobDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -34,8 +37,15 @@ export default function JobDetailPage() {
     const { user, token } = useAuth();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
-    const [applying, setApplying] = useState(false);
     const [applied, setApplied] = useState(false);
+
+    // Modal state
+    const [showModal, setShowModal] = useState(false);
+    const [vaultDocs, setVaultDocs] = useState<VaultDoc[]>([]);
+    const [loadingDocs, setLoadingDocs] = useState(false);
+    const [selectedDocs, setSelectedDocs] = useState<Record<string, string>>({});
+    const [coverLetter, setCoverLetter] = useState('');
+    const [applying, setApplying] = useState(false);
     const [applyError, setApplyError] = useState('');
 
     const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
@@ -47,11 +57,54 @@ export default function JobDetailPage() {
             .finally(() => setLoading(false));
     }, [id, API, router]);
 
-    if (loading) return (
-        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-            <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-        </div>
-    );
+    const openApplyModal = async () => {
+        if (!token || !job) return;
+        setShowModal(true); setApplyError('');
+        if (job.requiredDocs.length > 0) {
+            setLoadingDocs(true);
+            try {
+                const docs = await documentsApi.list(token);
+                setVaultDocs(docs);
+                // Pre-select matching documents if available
+                const initialSelected: Record<string, string> = {};
+                job.requiredDocs.forEach(req => {
+                    const match = docs.find(d => d.category === req.documentCategory);
+                    if (match) initialSelected[req.id] = match.id;
+                });
+                setSelectedDocs(initialSelected);
+            } catch { setApplyError("Impossible de charger votre coffre-fort."); }
+            finally { setLoadingDocs(false); }
+        }
+    };
+
+    const submitApplication = async () => {
+        if (!token || !job) return;
+
+        // Validate mandatory docs
+        const applicationDocs: { category: string; documentId: string }[] = [];
+        for (const req of job.requiredDocs) {
+            const docId = selectedDocs[req.id];
+            if (!docId && !req.isOptional) {
+                setApplyError(`Le document "${req.label}" est requis.`);
+                return;
+            }
+            if (docId) applicationDocs.push({ category: req.documentCategory, documentId: docId });
+        }
+
+        setApplying(true); setApplyError('');
+        try {
+            const res = await fetch(`${API}/jobs/${id}/apply`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ coverLetter, applicationDocs }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Erreur lors de la candidature');
+            setApplied(true); setShowModal(false);
+        } catch (err: unknown) { setApplyError(err instanceof Error ? err.message : 'Erreur'); }
+        finally { setApplying(false); }
+    };
+
+    if (loading) return <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center"><div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /></div>;
     if (!job) return null;
 
     const dl = daysLeft(job.deadline);
@@ -60,62 +113,46 @@ export default function JobDetailPage() {
 
     return (
         <div className="min-h-screen bg-[#0a0a0a]">
-            {/* Mali bar */}
-            <div className="fixed top-0 left-0 right-0 flex h-[3px] z-50">
-                <div className="flex-1 bg-[#14B53A]" /><div className="flex-1 bg-[#FCD116]" /><div className="flex-1 bg-[#CE1126]" />
-            </div>
-
             {/* Nav */}
+            <div className="fixed top-0 left-0 right-0 flex h-[3px] z-50"><div className="flex-1 bg-[#14B53A]" /><div className="flex-1 bg-[#FCD116]" /><div className="flex-1 bg-[#CE1126]" /></div>
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2">
-                    <span className="text-white font-bold tracking-tight">MaliLink</span>
-                    <span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
-                </Link>
-                <Link href="/jobs" className="text-sm text-gray-500 hover:text-white transition">← Offres</Link>
+                <Link href="/" className="flex items-center gap-2"><span className="text-white font-bold tracking-tight">MaliLink</span><span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span></Link>
+                <Link href="/jobs" className="text-sm text-gray-400 hover:text-white transition group flex items-center gap-1"><span className="group-hover:-translate-x-1 transition-transform">←</span> Retour aux offres</Link>
             </nav>
 
-            <div className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main */}
+            <motion.div variants={pageVariants} initial="hidden" animate="show" className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
                 <div className="lg:col-span-2 space-y-4">
                     {/* Header */}
-                    <div className={cardCls}>
-                        <div className="flex gap-2 flex-wrap mb-4">
+                    <div className={cardCls + " relative overflow-hidden"}>
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none scale-150 rotate-12">
+                            <Activity size={120} />
+                        </div>
+                        <div className="flex gap-2 flex-wrap mb-4 relative z-10">
                             <span className="text-[11px] font-semibold border border-white/20 text-white rounded-full px-2.5 py-0.5">{TYPE_MAP[job.type] || job.type}</span>
-                            {job.isDiasporaOpen && <span className="text-[11px] border border-white/10 text-gray-300 rounded-full px-2.5 py-0.5">🌍 Diaspora</span>}
-                            {job.isRemoteAbroad && <span className="text-[11px] border border-white/10 text-gray-300 rounded-full px-2.5 py-0.5">💻 Télétravail international</span>}
-                            {dl <= 2 && dl > 0 && <span className="text-[11px] border border-red-500/30 text-red-400 rounded-full px-2.5 py-0.5 animate-pulse">⚡ Urgent</span>}
+                            {job.isDiasporaOpen && <span className="text-[11px] border border-white/10 text-gray-300 rounded-full px-2.5 py-0.5 flex items-center gap-1">🌍 Diaspora</span>}
+                            {job.isRemoteAbroad && <span className="text-[11px] border border-white/10 text-gray-300 rounded-full px-2.5 py-0.5 flex items-center gap-1">💻 Télétravail</span>}
+                            {dl <= 2 && dl > 0 && <span className="text-[11px] border border-red-500/30 text-red-400 rounded-full px-2.5 py-0.5 animate-pulse flex items-center gap-1">⚡ Urgent</span>}
                         </div>
-                        <h1 className="text-2xl font-bold text-white tracking-tight mb-1">{job.title}</h1>
-                        <p className="text-gray-400">
-                            {job.employer.name}
-                            {job.employer.isVerified && <span className="text-[#14B53A] ml-2 text-sm">✓ Vérifié</span>}
+                        <h1 className="text-2xl font-bold text-white tracking-tight mb-2 relative z-10">{job.title}</h1>
+                        <p className="text-gray-400 flex items-center gap-2 relative z-10">
+                            <Building size={16} /> {job.employer.name}{job.employer.isVerified && <CheckCircle2 size={16} className="text-[#14B53A]" />}
                         </p>
-                        <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-500">
-                            <span>📍 {regions.join(', ')}</span>
-                            <span>🏭 {job.sector}</span>
-                            <span>👁 {job.viewCount} vues</span>
-                            <span>👥 {job.applicationCount} candidature{job.applicationCount !== 1 ? 's' : ''}</span>
+                        <div className="flex flex-wrap gap-x-5 gap-y-3 mt-5 text-sm text-gray-500 relative z-10">
+                            <span className="flex items-center gap-1.5"><MapPin size={16} className="text-gray-400" /> {regions.join(', ')}</span>
+                            <span className="flex items-center gap-1.5"><Activity size={16} className="text-gray-400" /> {job.sector}</span>
+                            <span className="flex items-center gap-1.5"><Eye size={16} className="text-gray-400" /> {job.viewCount} vues</span>
+                            <span className="flex items-center gap-1.5"><Users size={16} className="text-gray-400" /> {job.applicationCount} candidature{job.applicationCount !== 1 && 's'}</span>
                         </div>
                     </div>
 
-                    {/* Description */}
-                    <div className={cardCls}>
-                        <h2 className="text-white font-semibold mb-3">Description du poste</h2>
-                        <p className="text-gray-400 whitespace-pre-line leading-relaxed text-sm">{job.description}</p>
-                    </div>
+                    {/* Desc */}
+                    <div className={cardCls}><h2 className="flex items-center gap-2 text-white font-semibold mb-4 text-lg"><FileText size={20} className="text-[#14B53A]" /> Description du poste</h2><p className="text-gray-400 whitespace-pre-line leading-relaxed text-sm">{job.description}</p></div>
+                    {job.requirements && <div className={cardCls}><h2 className="flex items-center gap-2 text-white font-semibold mb-4 text-lg"><CheckCircle2 size={20} className="text-[#FCD116]" /> Profil recherché</h2><p className="text-gray-400 whitespace-pre-line leading-relaxed text-sm">{job.requirements}</p></div>}
 
-                    {/* Requirements */}
-                    {job.requirements && (
-                        <div className={cardCls}>
-                            <h2 className="text-white font-semibold mb-3">Profil recherché</h2>
-                            <p className="text-gray-400 whitespace-pre-line leading-relaxed text-sm">{job.requirements}</p>
-                        </div>
-                    )}
-
-                    {/* Required docs */}
+                    {/* Docs */}
                     {job.requiredDocs.length > 0 && (
                         <div className={cardCls}>
-                            <h2 className="text-white font-semibold mb-3">Documents requis à la candidature</h2>
+                            <h2 className="text-white font-semibold mb-3">Documents requis</h2>
                             <ul className="space-y-2">
                                 {job.requiredDocs.map(doc => (
                                     <li key={doc.id} className="flex items-center gap-3 text-sm">
@@ -127,83 +164,130 @@ export default function JobDetailPage() {
                             </ul>
                         </div>
                     )}
-
-                    {/* Relocation */}
-                    {job.relocationAid && (
-                        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                            <h2 className="text-white font-semibold mb-2">🚁 Aide à la relocalisation</h2>
-                            <p className="text-gray-400 text-sm">{job.relocationAid}</p>
-                        </div>
-                    )}
                 </div>
 
                 {/* Sidebar */}
                 <div className="space-y-4">
-                    {/* Apply CTA */}
                     <div className="sticky top-20 space-y-4">
                         <div className={cardCls + " space-y-4"}>
                             {(job.salaryMin || job.salaryMax) && (
-                                <div className="text-center py-2 border-b border-white/[0.06]">
-                                    <p className="text-gray-500 text-xs mb-1">Salaire mensuel</p>
-                                    <p className="text-white font-bold">{job.salaryMin?.toLocaleString()} – {job.salaryMax?.toLocaleString()} FCFA</p>
-                                </div>
+                                <div className="text-center py-2 border-b border-white/[0.06]"><p className="text-gray-500 text-xs mb-1">Salaire</p><p className="text-white font-bold">{job.salaryMin?.toLocaleString()} – {job.salaryMax?.toLocaleString()} FCFA</p></div>
                             )}
-
                             <div className="space-y-0">
                                 <div className={rowCls}><span className="text-gray-500">Niveau d&apos;études</span><span className="text-white text-right">{eduLevels.join(', ') || '—'}</span></div>
                                 <div className={rowCls}><span className="text-gray-500">Expérience</span><span className="text-white">{EXP_MAP[job.experienceLevel] || job.experienceLevel}</span></div>
                                 <div className={rowCls}><span className="text-gray-500">Date limite</span><span className={dl <= 7 ? 'text-red-400' : 'text-white'}>{formatDate(job.deadline)}</span></div>
-                                <div className={rowCls}><span className="text-gray-500">Publiée le</span><span className="text-white">{formatDate(job.publishedAt)}</span></div>
                             </div>
 
                             {user ? (
-                                applied ? (
-                                    <div className="text-center">
-                                        <p className="text-[#14B53A] font-medium">✅ Candidature envoyée !</p>
-                                        <Link href="/dashboard/applications" className="text-sm text-gray-400 hover:text-white mt-1 inline-block transition">Voir mes candidatures →</Link>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <button onClick={async () => {
-                                            setApplying(true); setApplyError('');
-                                            try {
-                                                const res = await fetch(`${API}/jobs/${id}/apply`, {
-                                                    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                                                    body: JSON.stringify({}),
-                                                });
-                                                const data = await res.json();
-                                                if (!res.ok) throw new Error(data.message || 'Erreur');
-                                                setApplied(true);
-                                            } catch (err: unknown) { setApplyError(err instanceof Error ? err.message : 'Erreur'); }
-                                            setApplying(false);
-                                        }} disabled={applying}
-                                            className="w-full bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-100 disabled:opacity-50 transition">
-                                            {applying ? 'Envoi...' : 'Postuler maintenant →'}
+                                user.role === 'CANDIDATE' ? (
+                                    applied ? (
+                                        <div className="text-center p-4 bg-[#14B53A]/10 border border-[#14B53A]/20 rounded-xl">
+                                            <p className="text-[#14B53A] font-medium flex items-center justify-center gap-2"><CheckCircle2 size={16} /> Candidature envoyée !</p>
+                                            <Link href="/dashboard/applications" className="text-sm text-[#14B53A]/80 hover:text-[#14B53A] underline mt-2 inline-block transition">Suivre mon dossier</Link>
+                                        </div>
+                                    ) : (
+                                        <button onClick={openApplyModal} className="group relative w-full bg-white text-black font-semibold py-3.5 rounded-xl hover:bg-gray-100 transition shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_25px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2 overflow-hidden">
+                                            <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out" />
+                                            <Send size={18} /> Postuler maintenant
                                         </button>
-                                        {applyError && <p className="text-red-400 text-xs mt-2">{applyError}</p>}
-                                    </>
+                                    )
+                                ) : (
+                                    <div className="text-center p-4 bg-white/[0.02] border border-white/[0.06] rounded-xl text-gray-400 text-sm flex flex-col items-center gap-2">
+                                        <AlertCircle size={20} className="text-gray-500" />
+                                        {user.role === 'RECRUITER' ? 'Seuls les candidats peuvent postuler aux offres.' : 'En tant qu\'administrateur, vous ne pouvez pas postuler.'}
+                                    </div>
                                 )
                             ) : (
                                 <div className="space-y-2">
-                                    <Link href="/login" className="block w-full text-center bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-100 transition">
-                                        Postuler (connexion requise)
-                                    </Link>
-                                    <Link href="/register" className="block w-full text-center border border-white/10 text-gray-400 hover:text-white font-medium py-2.5 rounded-xl transition text-sm">
-                                        Créer un compte gratuit
-                                    </Link>
+                                    <Link href="/login" className="block w-full text-center bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-100 transition">Postuler (connexion requise)</Link>
+                                    <Link href="/register" className="block w-full text-center border border-white/10 text-gray-400 hover:text-white font-medium py-2.5 rounded-xl transition text-sm">Créer un compte</Link>
                                 </div>
                             )}
                         </div>
-
-                        {/* Employer */}
-                        <div className={cardCls}>
-                            <h3 className="text-white font-semibold mb-1">{job.employer.name}</h3>
-                            {job.employer.isVerified && <span className="text-xs text-[#14B53A]">✓ Employeur vérifié MaliLink</span>}
-                            {job.employer.description && <p className="text-gray-500 text-xs mt-3 leading-relaxed line-clamp-4">{job.employer.description}</p>}
-                        </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
+
+            {/* Application Modal */}
+            <AnimatePresence>
+                {showModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                        <motion.div variants={modalVariants} initial="hidden" animate="show" exit="exit" className="bg-[#111] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden">
+                            {/* Glow effect for modal */}
+                            <div className="absolute -top-[100px] -right-[100px] w-[300px] h-[300px] bg-[#14B53A]/10 mix-blend-screen blur-[80px] rounded-full pointer-events-none" />
+
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.02] relative z-10">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white flex items-center gap-2"><Send size={20} className="text-[#14B53A]" /> Envoyer ma candidature</h3>
+                                    <p className="text-sm text-gray-400 mt-1">{job.title} chez {job.employer.name}</p>
+                                </div>
+                                <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-white p-2 text-2xl leading-none transition-colors">&times;</button>
+                            </div>
+
+                            <div className="p-6 overflow-y-auto flex-1 space-y-6 relative z-10">
+                                {/* Required Docs Section */}
+                                {job.requiredDocs.length > 0 && (
+                                    <div>
+                                        <h4 className="text-white font-medium mb-3 flex items-center gap-2">📄 Documents requis</h4>
+                                        {loadingDocs ? (
+                                            <div className="py-4 text-center"><div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto" /></div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                {job.requiredDocs.map(req => {
+                                                    const matchDocs = vaultDocs.filter(d => d.category === req.documentCategory);
+                                                    return (
+                                                        <div key={req.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+                                                            <label className="block text-sm font-medium text-gray-200 mb-2">
+                                                                {req.label} {!req.isOptional && <span className="text-red-400">*</span>}
+                                                            </label>
+                                                            {matchDocs.length > 0 ? (
+                                                                <select
+                                                                    value={selectedDocs[req.id] || ''}
+                                                                    onChange={e => setSelectedDocs(prev => ({ ...prev, [req.id]: e.target.value }))}
+                                                                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-white/30"
+                                                                >
+                                                                    <option value="">Sélectionner un document...</option>
+                                                                    {matchDocs.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                                                                </select>
+                                                            ) : (
+                                                                <div className="text-sm text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 flex flex-col gap-2">
+                                                                    <span>Vous n'avez aucun document de type <b>{req.documentCategory}</b> dans votre coffre-fort.</span>
+                                                                    <Link href="/dashboard/documents" className="text-white underline hover:text-amber-300 w-fit">Aller dans mon coffre-fort →</Link>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Cover Letter */}
+                                <div>
+                                    <h4 className="text-white font-medium mb-3">Lettre de motivation (optionnelle)</h4>
+                                    <textarea
+                                        value={coverLetter} onChange={e => setCoverLetter(e.target.value)}
+                                        rows={4}
+                                        placeholder="Présentez brièvement votre motivation pour ce poste..."
+                                        className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-white/20 resize-y"
+                                    />
+                                </div>
+
+                                {applyError && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{applyError}</div>}
+                            </div>
+
+                            <div className="p-6 border-t border-white/10 bg-white/[0.01] flex justify-end gap-3">
+                                <button onClick={() => setShowModal(false)} className="px-5 py-2.5 text-sm font-medium text-white hover:bg-white/5 rounded-xl transition">Annuler</button>
+                                <button onClick={submitApplication} disabled={applying || loadingDocs} className="px-5 py-2.5 text-sm font-semibold bg-white text-black hover:bg-gray-100 rounded-xl transition disabled:opacity-50 flex items-center gap-2">
+                                    {applying ? <><div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" /> Envoi...</> : <><Send size={16} /> Confirmer la candidature</>}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

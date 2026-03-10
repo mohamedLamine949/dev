@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import NotificationBell from '@/components/NotificationBell';
+import { motion, Variants } from 'framer-motion';
+import { Phone, Mail, Globe, Calendar, CheckCircle2, MessageSquare, Eye, Star, X, Check, Inbox, Briefcase } from 'lucide-react';
 
 interface Job { id: string; title: string; }
 interface RecruiterApp {
@@ -11,16 +14,19 @@ interface RecruiterApp {
     messages: { id: string; content: string; createdAt: string }[];
 }
 
-const STATUS_MAP: Record<string, { label: string; dot: string }> = {
-    SENT: { label: 'Nouvelle', dot: 'bg-gray-400' },
-    REVIEWED: { label: 'Consultée', dot: 'bg-[#FCD116]' },
-    SHORTLISTED: { label: 'Présélectionné', dot: 'bg-white' },
-    INTERVIEW: { label: 'Entretien', dot: 'bg-white' },
-    ACCEPTED: { label: 'Accepté', dot: 'bg-[#14B53A]' },
-    REJECTED: { label: 'Refusé', dot: 'bg-red-500' },
+const STATUS_MAP: Record<string, { label: string; dot: string; bg: string; text: string }> = {
+    SENT: { label: 'Nouvelle', dot: 'bg-gray-400', bg: 'bg-gray-500/10', text: 'text-gray-400' },
+    REVIEWED: { label: 'Consultée', dot: 'bg-[#FCD116]', bg: 'bg-[#FCD116]/10', text: 'text-[#FCD116]' },
+    SHORTLISTED: { label: 'Présélectionné', dot: 'bg-blue-400', bg: 'bg-blue-500/10', text: 'text-blue-400' },
+    INTERVIEW: { label: 'Entretien', dot: 'bg-purple-400', bg: 'bg-purple-500/10', text: 'text-purple-400' },
+    ACCEPTED: { label: 'Accepté', dot: 'bg-[#14B53A]', bg: 'bg-[#14B53A]/10', text: 'text-[#14B53A]' },
+    REJECTED: { label: 'Refusé', dot: 'bg-red-500', bg: 'bg-red-500/10', text: 'text-red-400' },
 };
 
-const actionBtnCls = "text-xs border px-3 py-1 rounded-lg transition";
+const containerVariants: Variants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+const itemVariants: Variants = { hidden: { opacity: 0, y: 10, scale: 0.98 }, show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } } };
+
+const actionBtnCls = "flex items-center gap-1.5 text-xs font-semibold border px-3 py-1.5 rounded-lg transition-all shadow-sm";
 
 export default function RecruiterApplicationsPage() {
     const { user, token } = useAuth();
@@ -72,82 +78,102 @@ export default function RecruiterApplicationsPage() {
                     <span className="text-white font-bold tracking-tight">MaliLink</span>
                     <span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
                 </Link>
-                <Link href="/dashboard" className="text-sm text-gray-500 hover:text-white transition">← Tableau de bord</Link>
+                <div className="flex items-center gap-4">
+                    <NotificationBell />
+                    <Link href="/dashboard" className="text-sm text-gray-500 hover:text-white transition">← Tableau de bord</Link>
+                </div>
             </nav>
 
             <div className="max-w-5xl mx-auto px-4 py-10">
-                <h1 className="text-2xl font-bold text-white tracking-tight mb-6">Candidatures reçues</h1>
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2.5 rounded-xl bg-[#14B53A]/10 text-[#14B53A]">
+                        <Briefcase size={24} />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold text-white tracking-tight">Candidatures reçues</h1>
+                        <p className="text-gray-400 text-sm">Gérez les postulants pour vos différentes annonces</p>
+                    </div>
+                </div>
 
                 {/* Job selector */}
-                <div className="mb-6 p-4 rounded-2xl border border-white/[0.07] bg-white/[0.02]">
-                    <label className="block text-xs text-gray-400 mb-2">Sélectionnez une offre</label>
+                <div className="mb-6 p-5 rounded-2xl border border-white/[0.07] bg-white/[0.02] backdrop-blur-md">
+                    <label className="block text-xs font-medium text-gray-400 mb-2">Sélectionnez une offre pour voir ses candidatures</label>
                     <select value={selectedJob} onChange={e => setSelectedJob(e.target.value)}
-                        className="w-full bg-[#111] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition">
+                        className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition shadow-inner">
                         <option value="">-- Choisir une offre --</option>
                         {jobs.map(j => <option key={j.id} value={j.id}>{j.title}</option>)}
                     </select>
                 </div>
 
                 {!selectedJob ? (
-                    <div className="rounded-2xl border border-white/[0.07] p-12 text-center">
-                        <p className="text-3xl mb-3">📋</p>
-                        <p className="text-white font-medium">Sélectionnez une offre ci-dessus</p>
-                        <p className="text-gray-500 text-sm mt-1">Les candidatures reçues apparaîtront ici</p>
-                    </div>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card rounded-3xl p-12 text-center flex flex-col items-center">
+                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                            <Inbox size={40} className="text-gray-500" />
+                        </div>
+                        <p className="text-xl font-bold text-white mb-2">Sélectionnez une offre ci-dessus</p>
+                        <p className="text-gray-500 text-sm">Les candidatures reçues apparaîtront ici</p>
+                    </motion.div>
                 ) : loading ? (
-                    <div className="flex justify-center py-12"><div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /></div>
+                    <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-[#14B53A]/20 border-t-[#14B53A] rounded-full animate-spin" /></div>
                 ) : applications.length === 0 ? (
-                    <div className="rounded-2xl border border-white/[0.07] p-12 text-center">
-                        <p className="text-3xl mb-3">📭</p>
-                        <p className="text-white font-medium">Aucune candidature reçue</p>
-                    </div>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card rounded-3xl p-12 text-center flex flex-col items-center">
+                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                            <Inbox size={40} className="text-gray-500" />
+                        </div>
+                        <p className="text-xl font-bold text-white mb-2">Aucune candidature reçue</p>
+                        <p className="text-gray-500 text-sm">Cette offre n&apos;a pas encore attiré de candidats.</p>
+                    </motion.div>
                 ) : (
                     <>
-                        <p className="text-gray-500 text-sm mb-4">{total} candidature{total !== 1 ? 's' : ''}</p>
-                        <div className="space-y-3">
+                        <p className="text-gray-400 text-sm mb-4 font-medium">{total} candidature{total !== 1 ? 's' : ''} trouvée{total !== 1 ? 's' : ''}</p>
+                        <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-4 md:grid-cols-2">
                             {applications.map(app => {
                                 const st = STATUS_MAP[app.status] || STATUS_MAP.SENT;
                                 return (
-                                    <div key={app.id} className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-5">
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div>
-                                                <h3 className="text-white font-medium">{app.user.firstName} {app.user.lastName}</h3>
-                                                <p className="text-gray-500 text-sm">📞 {app.user.phone}{app.user.email ? ` · ${app.user.email}` : ''}</p>
-                                                <p className="text-gray-600 text-xs mt-0.5">🌍 {app.user.country} · {new Date(app.createdAt).toLocaleDateString('fr-FR')}</p>
+                                    <motion.div variants={itemVariants} key={app.id} className="group rounded-2xl glass-card glass-card-hover p-6 flex flex-col relative overflow-hidden">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="min-w-0 pr-4">
+                                                <h3 className="text-white font-bold text-lg mb-1 truncate">{app.user.firstName} {app.user.lastName}</h3>
+                                                <div className="space-y-1.5 text-sm text-gray-400">
+                                                    <div className="flex items-center gap-2"><Phone size={14} className="text-[#FCD116]" /> <span className="truncate">{app.user.phone}</span></div>
+                                                    {app.user.email && <div className="flex items-center gap-2"><Mail size={14} className="text-[#CE1126]" /> <span className="truncate">{app.user.email}</span></div>}
+                                                    <div className="flex items-center gap-2"><Globe size={14} className="text-[#14B53A]" /> <span className="truncate">{app.user.country}</span></div>
+                                                    <div className="flex items-center gap-2"><Calendar size={14} className="text-gray-500" /> <span className="text-xs">Postulé le {new Date(app.createdAt).toLocaleDateString('fr-FR')}</span></div>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
-                                                <span className="text-xs text-gray-300">{st.label}</span>
+                                            <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${st.bg} ${st.text} border border-white/5 whitespace-nowrap shrink-0`}>
+                                                {st.label}
                                             </div>
                                         </div>
-                                        <div className="flex flex-wrap gap-2 pt-3 border-t border-white/[0.06]">
+
+                                        <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-white/[0.04] mt-auto">
                                             {app.status === 'SENT' && (
                                                 <button onClick={() => updateStatus(app.id, 'REVIEWED')}
-                                                    className={actionBtnCls + " border-white/10 text-gray-400 hover:border-white/20 hover:text-white"}>👁 Lue</button>
+                                                    className={actionBtnCls + " bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20 hover:text-white"}><Eye size={14} /> Lue</button>
                                             )}
                                             {['SENT', 'REVIEWED'].includes(app.status) && (
                                                 <button onClick={() => updateStatus(app.id, 'SHORTLISTED')}
-                                                    className={actionBtnCls + " border-white/10 text-gray-400 hover:border-white/20 hover:text-white"}>⭐ Présélectionner</button>
+                                                    className={actionBtnCls + " bg-blue-500/10 border-blue-500/20 text-blue-400 hover:bg-blue-500/20"}><Star size={14} /> Pré-sélectionner</button>
                                             )}
                                             {['SHORTLISTED', 'REVIEWED'].includes(app.status) && (
                                                 <button onClick={() => updateStatus(app.id, 'INTERVIEW')}
-                                                    className={actionBtnCls + " border-white/10 text-gray-400 hover:border-white/20 hover:text-white"}>🗓 Entretien</button>
+                                                    className={actionBtnCls + " bg-purple-500/10 border-purple-500/20 text-purple-400 hover:bg-purple-500/20"}><Calendar size={14} /> Entretien</button>
                                             )}
                                             {app.status === 'INTERVIEW' && (
                                                 <button onClick={() => updateStatus(app.id, 'ACCEPTED')}
-                                                    className={actionBtnCls + " border-[#14B53A]/30 text-[#14B53A] hover:bg-[#14B53A]/10"}>🎉 Accepter</button>
+                                                    className={actionBtnCls + " bg-[#14B53A]/10 border-[#14B53A]/20 text-[#14B53A] hover:bg-[#14B53A]/20"}><Check size={14} /> Accepter</button>
                                             )}
                                             {!['ACCEPTED', 'REJECTED'].includes(app.status) && (
                                                 <button onClick={() => updateStatus(app.id, 'REJECTED')}
-                                                    className={actionBtnCls + " border-red-500/20 text-red-400 hover:bg-red-500/10"}>✕ Refuser</button>
+                                                    className={actionBtnCls + " bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"}><X size={14} /> Refuser</button>
                                             )}
                                             <Link href={`/dashboard/applications/${app.id}`}
-                                                className={actionBtnCls + " border-white/10 text-gray-400 hover:border-white/20 hover:text-white ml-auto"}>💬 Message</Link>
+                                                className={actionBtnCls + " bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20 hover:text-white ml-auto"}><MessageSquare size={14} /> Message</Link>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 );
                             })}
-                        </div>
+                        </motion.div>
                     </>
                 )}
             </div>

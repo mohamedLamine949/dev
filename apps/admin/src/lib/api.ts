@@ -42,10 +42,13 @@ export const adminApi = {
     getUsers: (token: string, params: string) => fetchAPI<any>(`/admin/users?${params}`, { headers: { Authorization: `Bearer ${token}` } }),
     suspendUser: (token: string, id: string, isSuspended: boolean) =>
         fetchAPI(`/admin/users/${id}/suspend`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ isSuspended }) }),
+    getUserDetail: (token: string, id: string) => fetchAPI<any>(`/admin/users/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
     getEmployers: (token: string, params: string) => fetchAPI<any>(`/admin/employers?${params}`, { headers: { Authorization: `Bearer ${token}` } }),
-    verifyEmployer: (token: string, id: string, isVerified: boolean) =>
-        fetchAPI(`/admin/employers/${id}/verify`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ isVerified }) }),
+    verifyEmployer: (token: string, id: string, status: string, note?: string) =>
+        fetchAPI(`/admin/employers/${id}/verify`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ status, note }) }),
+    getEmployerDetail: (token: string, id: string) => fetchAPI<any>(`/admin/employers/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
     getJobs: (token: string, params: string) => fetchAPI<any>(`/admin/jobs?${params}`, { headers: { Authorization: `Bearer ${token}` } }),
     updateJobStatus: (token: string, id: string, status: string) =>
         fetchAPI(`/admin/jobs/${id}/status`, { method: 'PATCH', headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify({ status }) }),
+    getJobDetail: (token: string, id: string) => fetchAPI<any>(`/admin/jobs/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
 };
