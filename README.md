@@ -37,6 +37,7 @@ Le projet est un monorepo géré avec **pnpm** et **Turborepo** :
    - Créez un compte sur [supabase.com](https://supabase.com).
    - Créez un nouveau projet (ex: "MaliLink").
    - Allez dans **Project Settings > Database** et récupérez votre **Connection String** (format URI).
+   - **Important** : Remplacez le tag `[YOUR-PASSWORD]` par le mot de passe que vous avez défini lors de la création du projet.
    - Assurez-vous d'utiliser le mode "Direct connection" (port 5432).
 
 4. **Configuration de l'environnement**
