@@ -21,10 +21,11 @@ export default function HomeScreen() {
         { icon: '📋', label: 'Candidatures', desc: 'Suivre mes dossiers', route: 'Mes Candidatures' },
         { icon: '📁', label: 'Documents', desc: 'Coffre-fort', route: 'Coffre-fort' },
     ];
-    // Recruiters don't have standard mobile tabs built yet for "Publier", so we default them to Jobs mostly.
     const recruiterActions = [
-        { icon: '📢', label: 'Les offres', desc: 'Parcourir les offres', route: 'MaliLink Jobs' },
-        { icon: '📄', label: 'Mon Profil', desc: 'Gérer mon compte', route: 'Mon Profil' },
+        { icon: '💼', label: 'Offres publiées', desc: 'Gérer vos offres', route: 'MaliLink Jobs' },
+        { icon: '➕', label: 'Publier', desc: 'Nouvelle offre', route: 'RecruiterNewJob' },
+        { icon: '📋', label: 'Candidatures', desc: 'Suivre les dossiers', route: 'RecruiterApplications' },
+        { icon: '🏢', label: 'Mon Entreprise', desc: 'Profil de structure', route: 'RecruiterEmployer' },
     ];
     const actions = user.role === 'RECRUITER' ? recruiterActions : candidateActions;
 

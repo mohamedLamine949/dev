@@ -8,10 +8,14 @@ async function bootstrap() {
   // CORS — allow the Next.js web app to call the API
   app.enableCors({
     origin: [
-      'http://localhost:3000', // web
-      'http://localhost:3002', // admin
+      'http://localhost:3000',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3002',
     ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   // Gobal prefix & validation

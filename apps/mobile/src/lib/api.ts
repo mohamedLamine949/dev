@@ -135,6 +135,21 @@ export const jobsApi = {
     },
     get: (id: string): Promise<Job> =>
         fetchAPI(`/jobs/${id}`),
+    create: (token: string, dto: any): Promise<Job> =>
+        fetchAPI('/jobs', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: JSON.stringify(dto)
+        }),
+    publish: (token: string, id: string): Promise<Job> =>
+        fetchAPI(`/jobs/${id}/publish`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${token}` }
+        }),
+    getApplications: (token: string, id: string): Promise<{ applications: any[]; total: number }> =>
+        fetchAPI(`/jobs/${id}/applications`, {
+            headers: { Authorization: `Bearer ${token}` }
+        }),
 };
 
 export const appsApi = {
@@ -146,6 +161,12 @@ export const appsApi = {
         }),
     getMyApps: (token: string) =>
         fetchAPI('/applications/mine', { headers: { Authorization: `Bearer ${token}` } }),
+    updateStatus: (token: string, id: string, status: string) =>
+        fetchAPI(`/applications/${id}/status`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ status })
+        }),
 };
 
 export const employerApi = {
@@ -159,6 +180,24 @@ export const employerApi = {
         fetchAPI<any[]>('/employers/me', {
             headers: { Authorization: `Bearer ${token}` },
         }),
+    uploadLogo: async (token: string, file: { uri: string; name: string; type: string }) => {
+        const formData = new FormData();
+        formData.append('file', {
+            uri: file.uri,
+            name: file.name,
+            type: file.type,
+        } as any);
+
+        const res = await fetch(`${API_URL}/employers/me/logo`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Erreur lors de l\'upload du logo');
+        return data;
+    },
 };
 
 export const documentsApi = {

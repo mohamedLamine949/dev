@@ -23,6 +23,7 @@ const DOC_CATEGORIES = [
     { key: 'CASIER_JUDICIAIRE', label: 'Casier judiciaire' },
     { key: 'PASSEPORT', label: 'Passeport' },
     { key: 'CARTE_NINA', label: 'Carte NINA / Biométrique' },
+    { key: 'AUTRE', label: 'Autre (à préciser)' },
 ];
 
 interface ReqDoc { category: string; label: string; isOptional: boolean; }
@@ -58,6 +59,9 @@ export default function NewJobPage() {
     };
     const toggleOptional = (catKey: string) => {
         setReqDocs(prev => prev.map(d => d.category === catKey ? { ...d, isOptional: !d.isOptional } : d));
+    };
+    const updateDocLabel = (catKey: string, newLabel: string) => {
+        setReqDocs(prev => prev.map(d => d.category === catKey ? { ...d, label: newLabel } : d));
     };
     const isDocSelected = (catKey: string) => reqDocs.some(d => d.category === catKey);
 
@@ -255,7 +259,8 @@ export default function NewJobPage() {
                                 const selected = isDocSelected(cat.key);
                                 const doc = reqDocs.find(d => d.category === cat.key);
                                 return (
-                                    <div key={cat.key} className={`flex items-center justify-between p-3.5 rounded-lg border transition-all ${selected ? 'border-blue-500/20 bg-blue-500/10' : 'border-transparent hover:bg-white/[0.02]'}`}>
+                                    <div key={cat.key}>
+                                    <div className={`flex items-center justify-between p-3.5 rounded-lg border transition-all ${selected ? 'border-blue-500/20 bg-blue-500/10' : 'border-transparent hover:bg-white/[0.02]'}`}>
                                         <label className="flex items-center gap-3 cursor-pointer flex-1">
                                             <input type="checkbox" checked={selected} onChange={() => toggleReqDoc(cat.key, cat.label)} className="accent-blue-500 w-4 h-4 rounded" />
                                             <span className={`text-sm font-medium ${selected ? 'text-blue-100' : 'text-gray-400'}`}>{cat.label}</span>
@@ -266,6 +271,19 @@ export default function NewJobPage() {
                                                 <span className="text-xs font-semibold text-gray-400">Optionnel</span>
                                             </label>
                                         )}
+                                    </div>
+                                    {selected && cat.key === 'AUTRE' && (
+                                        <div className="mt-2 ml-7 pl-4 border-l-2 border-white/10">
+                                            <input 
+                                                type="text" 
+                                                placeholder="Précisez le document attendu (ex: Portfolio, Permis de Conduire...)" 
+                                                value={doc?.label === 'Autre (à préciser)' ? '' : doc?.label}
+                                                onChange={e => updateDocLabel(cat.key, e.target.value)}
+                                                className="w-full bg-white/[0.03] border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50" 
+                                                required
+                                            />
+                                        </div>
+                                    )}
                                     </div>
                                 );
                             })}

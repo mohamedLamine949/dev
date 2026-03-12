@@ -153,7 +153,7 @@ export default function ProfilePage() {
                             <label className="relative block group cursor-pointer shrink-0">
                                 <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
                                     {profile?.user.avatarS3Key ? (
-                                        <img src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/profile/avatar/${profile.userId}`} alt="Avatar" className="w-full h-full object-cover" />
+                                        <img src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/profile/avatar/${user.id}`} alt="Avatar" className="w-full h-full object-cover" />
                                     ) : (
                                         <span className="text-2xl font-bold text-slate-400">{profile?.user.firstName[0] || '?'}{profile?.user.lastName[0] || '?'}</span>
                                     )}

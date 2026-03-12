@@ -16,7 +16,7 @@ export default function ApplicationsScreen() {
     const loadApps = async () => {
         try {
             setLoading(true);
-            const data = await appsApi.getMyApps(token as string);
+            const data: any = await appsApi.getMyApps(token as string);
             setApps(data);
         } catch (error: any) {
             Alert.alert("Erreur", "Impossible de charger vos candidatures.");

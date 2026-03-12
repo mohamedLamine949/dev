@@ -19,6 +19,7 @@ export class JobsController {
             region: query.region,
             educationLevel: query.educationLevel,
             isDiaspora: query.diaspora === 'true',
+            userId: query.userId,
             page: query.page ? parseInt(query.page) : 1,
             limit: query.limit ? parseInt(query.limit) : 20,
         };

@@ -30,7 +30,7 @@ export default function RegisterScreen() {
         }
         setLoading(true);
         try {
-            await register(form);
+            await register({ firstName, lastName, phone, email, password, country, role });
         } catch (err: unknown) {
             Alert.alert('Erreur', err instanceof Error ? err.message : "Erreur d'inscription");
         } finally {
