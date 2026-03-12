@@ -7,6 +7,9 @@ import VaultScreen from './src/screens/VaultScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import ApplicationsScreen from './src/screens/ApplicationsScreen';
 import JobDetailsScreen from './src/screens/JobDetailsScreen';
+import RecruiterEmployerScreen from './src/screens/RecruiterEmployerScreen';
+import RecruiterNewJobScreen from './src/screens/RecruiterNewJobScreen';
+import RecruiterApplicationsScreen from './src/screens/RecruiterApplicationsScreen';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
 import { NavigationContainer, NavigationProp } from '@react-navigation/native';
@@ -19,6 +22,9 @@ export type RootStackParamList = {
   Register: undefined;
   AppTabs: undefined;
   JobDetails: { jobId: string };
+  RecruiterEmployer: undefined;
+  RecruiterNewJob: undefined;
+  RecruiterApplications: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -66,6 +72,9 @@ function MainNavigator() {
         <>
           <Stack.Screen name="AppTabs" component={TabNavigator} />
           <Stack.Screen name="JobDetails" component={JobDetailsScreen} />
+          <Stack.Screen name="RecruiterEmployer" component={RecruiterEmployerScreen} />
+          <Stack.Screen name="RecruiterNewJob" component={RecruiterNewJobScreen} />
+          <Stack.Screen name="RecruiterApplications" component={RecruiterApplicationsScreen} />
         </>
       )}
     </Stack.Navigator>

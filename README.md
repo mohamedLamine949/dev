@@ -44,24 +44,31 @@ Le projet est un monorepo géré avec **pnpm** et **Turborepo** :
    - Copiez `apps/api/.env.example` vers `apps/api/.env`.
    - Remplacez la valeur de `DATABASE_URL` par votre chaîne de connexion Supabase.
    - Copiez `apps/web/.env.example` vers `apps/web/.env.local`.
+   - Copiez `apps/admin/.env.example` vers `apps/admin/.env.local`.
 
 5. **Appliquer le schéma à la base de données**
    Depuis la racine :
    ```bash
    cd apps/api
    npx prisma db push
+   cd ../..
    ```
 
 ## 🏎️ Lancer le projet en développement
 
-À la racine du projet :
+À la racine du projet (lance tout en un terminal) :
 ```bash
 pnpm dev
 ```
 
 L'application sera disponible sur :
-- Frontend : [http://localhost:3000](http://localhost:3000)
-- API : [http://localhost:3001](http://localhost:3001)
+- **Frontend (Candidat/Recruteur)** : [http://localhost:3000](http://localhost:3000)
+- **API (Backend)** : [http://localhost:3001/api](http://localhost:3001/api)
+- **Panneau Admin** : [http://localhost:3002](http://localhost:3002)
+
+### Identifiants Admin (Base)
+- **Email** : `admin@malilink.ml`
+- **Mot de passe** : `Admin123!`
 
 ## ✨ Nouveau Design
 Nous avons récemment implémenté une charte graphique moderne en "Black & White" avec des accents tricolores Maliens. Le design se veut premium, dynamique et épuré.

@@ -75,6 +75,8 @@ export default function JobsPage() {
         if (filters.type) params.set('type', filters.type);
         if (filters.region) params.set('region', filters.region);
         if (filters.diaspora) params.set('diaspora', filters.diaspora);
+        if (user) params.set('userId', user.id);
+        
         try {
             const res = await fetch(`${API}/jobs?${params}`);
             const data = await res.json();
@@ -82,7 +84,7 @@ export default function JobsPage() {
             setTotal(data.total || 0);
         } catch { setJobs([]); }
         setLoading(false);
-    }, [API, page, filters]);
+    }, [API, page, filters, user]);
 
     useEffect(() => { fetchJobs(); }, [fetchJobs]);
 

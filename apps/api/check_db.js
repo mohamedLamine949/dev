@@ -1,7 +1,12 @@
 const { PrismaClient } = require('@prisma/client');
+const { Pool } = require('pg');
+const { PrismaPg } = require('@prisma/adapter-pg');
 
 async function main() {
-    const prisma = new PrismaClient();
+    const connectionString = process.env.DATABASE_URL;
+    const pool = new Pool({ connectionString });
+    const adapter = new PrismaPg(pool);
+    const prisma = new PrismaClient({ adapter });
     try {
         const employers = await prisma.employer.findMany();
         const users = await prisma.user.findMany({ select: { id: true, firstName: true, role: true, phone: true } });

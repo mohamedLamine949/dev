@@ -1,0 +1,8 @@
+﻿node_modules/expo/tsconfig.base.json(10,15): error TS6046: Argument for '--module' option must be: 'none', 'commonjs', 'amd', 'system', 'umd', 'es6', 'es2015', 'es2020', 'es2022', 'esnext', 'node16', 'nodenext'.
+src/screens/ApplicationsScreen.tsx(20,21): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SetStateAction<any[]>'.
+src/screens/ProfileScreen.tsx(128,68): error TS2345: Argument of type '{ container: { flex: number; backgroundColor: string; }; center: { flex: number; backgroundColor: string; justifyContent: "center"; alignItems: "center"; }; errorText: { color: string; fontSize: number; }; ... 22 more ...; itemSub: { ...; }; }' is not assignable to parameter of type '{ container: { flex: number; backgroundColor: string; }; center: { flex: number; backgroundColor: string; justifyContent: "center"; alignItems: "center"; }; errorText: { color: string; fontSize: number; }; ... 22 more ...; itemSub: { ...; }; } & NamedStyles<...>'.
+  Property 'scoreTitle' is incompatible with index signature.
+    Object literal may only specify known properties, and 'mb' does not exist in type 'ViewStyle | TextStyle | ImageStyle'.
+src/screens/RecruiterNewJobScreen.tsx(143,154): error TS2345: Argument of type 'string' is not assignable to parameter of type 'string[]'.
+src/screens/RecruiterNewJobScreen.tsx(173,156): error TS2345: Argument of type 'string' is not assignable to parameter of type 'string[]'.
+src/screens/RegisterScreen.tsx(33,28): error TS2304: Cannot find name 'form'.

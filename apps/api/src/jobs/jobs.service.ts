@@ -34,6 +34,7 @@ export interface JobFilters {
     region?: string;
     educationLevel?: string;
     isDiaspora?: boolean;
+    userId?: string;
     page?: number;
     limit?: number;
 }
@@ -43,7 +44,7 @@ export class JobsService {
     constructor(private readonly prisma: PrismaService) { }
 
     async findAll(filters: JobFilters = {}) {
-        const { keyword, sector, type, region, educationLevel, isDiaspora, page = 1, limit = 20 } = filters;
+        const { keyword, sector, type, region, educationLevel, isDiaspora, userId, page = 1, limit = 20 } = filters;
         const skip = (page - 1) * limit;
 
         const where: any = {
@@ -63,6 +64,11 @@ export class JobsService {
         if (region) where.regions = { contains: region };
         if (educationLevel) where.educationLevel = { contains: educationLevel };
         if (isDiaspora) where.isDiasporaOpen = true;
+        
+        // Hide jobs the user has already applied to
+        if (userId) {
+            where.applications = { none: { userId } };
+        }
 
         const [jobs, total] = await Promise.all([
             this.prisma.job.findMany({
