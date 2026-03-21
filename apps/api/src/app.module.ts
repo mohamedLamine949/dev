@@ -13,6 +13,7 @@ import { EmployerModule } from './employers/employer.module';
 import { DocumentsModule } from './documents/documents.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SavedJobsModule } from './saved-jobs/saved-jobs.module';
+import { TalentModule } from './talents/talent.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SavedJobsModule } from './saved-jobs/saved-jobs.module';
     DocumentsModule,
     NotificationsModule,
     SavedJobsModule,
+    TalentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

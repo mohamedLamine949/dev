@@ -9,7 +9,7 @@ import { motion, Variants } from 'framer-motion';
 import {
     Briefcase, User, Lock, FileText,
     PlusCircle, Building, Megaphone, Inbox,
-    Users, Layers, BarChart3
+    Users, Layers, BarChart3, Star
 } from 'lucide-react';
 
 const roleLabels: Record<string, string> = { RECRUITER: 'Recruteur', ADMIN: 'Admin', CANDIDATE: 'Candidat' };
@@ -101,14 +101,14 @@ export default function DashboardPage() {
                     variants={containerVariants}
                     initial="hidden"
                     animate="show"
-                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
                 >
                     {user.role === 'CANDIDATE' && (
                         <>
-                            <motion.div variants={itemVariants}><ActionCard icon={<Briefcase size={24} strokeWidth={1.5} />} title="Offres d'emploi" desc="Parcourir les offres" href="/jobs" /></motion.div>
-                            <motion.div variants={itemVariants}><ActionCard icon={<User size={24} strokeWidth={1.5} />} title="Mon Profil" desc="Gérer mon CV & infos" href="/dashboard/profile" /></motion.div>
-                            <motion.div variants={itemVariants}><ActionCard icon={<Lock size={24} strokeWidth={1.5} />} title="Mon Coffre-fort" desc="Documents sécurisés" href="/dashboard/documents" /></motion.div>
-                            <motion.div variants={itemVariants}><ActionCard icon={<FileText size={24} strokeWidth={1.5} />} title="Mes candidatures" desc="Suivre mes dossiers" href="/dashboard/applications" /></motion.div>
+                            <motion.div variants={itemVariants} className="lg:col-span-1"><ActionCard icon={<Briefcase size={24} strokeWidth={1.5} />} title="Offres d'emploi" desc="Parcourir les offres" href="/jobs" /></motion.div>
+                            <motion.div variants={itemVariants} className="lg:col-span-1"><ActionCard icon={<User size={24} strokeWidth={1.5} />} title="Mon Profil" desc="Gérer mon CV & infos" href="/dashboard/profile" /></motion.div>
+                            <motion.div variants={itemVariants} className="lg:col-span-1"><ActionCard icon={<Lock size={24} strokeWidth={1.5} />} title="Mon Coffre-fort" desc="Documents sécurisés" href="/dashboard/documents" /></motion.div>
+                            <motion.div variants={itemVariants} className="lg:col-span-1"><ActionCard icon={<FileText size={24} strokeWidth={1.5} />} title="Mes candidatures" desc="Suivre mes dossiers" href="/dashboard/applications" /></motion.div>
                         </>
                     )}
                     {user.role === 'RECRUITER' && (
@@ -117,6 +117,7 @@ export default function DashboardPage() {
                             <motion.div variants={itemVariants}><ActionCard icon={<Building size={24} strokeWidth={1.5} />} title="Mon Entreprise" desc="Profil employeur" href="/dashboard/recruiter/employer" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<Megaphone size={24} strokeWidth={1.5} />} title="Mes offres" desc="Gérer mes annonces" href="/jobs" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<Inbox size={24} strokeWidth={1.5} />} title="Candidatures" desc="Examiner les dossiers" href="/dashboard/recruiter/applications" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Star size={24} strokeWidth={1.5} />} title="Trouver des Talents" desc="Recherche avancée" href="/dashboard/recruiter/talents" /></motion.div>
                         </>
                     )}
                     {user.role === 'ADMIN' && (

@@ -162,3 +162,24 @@ export const profileApi = {
         return data;
     },
 };
+
+export const talentsApi = {
+    search: (token: string, params: any) => {
+        const query = new URLSearchParams();
+        if (params.q) query.append('q', params.q);
+        if (params.isDiaspora) query.append('isDiaspora', params.isDiaspora);
+        if (params.regions) query.append('regions', params.regions);
+        if (params.sectors) query.append('sectors', params.sectors);
+        if (params.educationLevel) query.append('educationLevel', params.educationLevel);
+        if (params.experienceLevel) query.append('experienceLevel', params.experienceLevel);
+
+        return fetchAPI<any[]>(`/talents/search?${query.toString()}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+    },
+    getOne: (token: string, id: string) =>
+        fetchAPI<any>(`/talents/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        }),
+};
+
