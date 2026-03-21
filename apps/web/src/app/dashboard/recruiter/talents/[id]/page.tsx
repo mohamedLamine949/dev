@@ -105,8 +105,14 @@ export default function TalentDetailPage() {
                             </div>
 
                             <div className="pt-4 flex flex-wrap justify-center md:justify-start gap-3">
-                                <a href={`mailto:${talent.email}`} className="flex items-center gap-2 bg-white text-black font-bold px-6 py-2.5 rounded-xl hover:bg-gray-200 transition-colors"><Mail size={16} /> Envoyer un mail</a>
-                                <a href={`tel:${talent.phone}`} className="flex items-center gap-2 bg-white/5 border border-white/10 text-white font-bold px-6 py-2.5 rounded-xl hover:bg-white/10 transition-colors"><Phone size={16} /> Appeler</a>
+                                {talent.email && (
+                                    <a href={`mailto:${talent.email}`} className="flex items-center gap-2 bg-white text-black font-bold px-6 py-2.5 rounded-xl hover:bg-gray-200 transition-colors">
+                                        <Mail size={16} /> {talent.email}
+                                    </a>
+                                )}
+                                <a href={`tel:${talent.phone}`} className="flex items-center gap-2 bg-white/5 border border-white/10 text-white font-bold px-6 py-2.5 rounded-xl hover:bg-white/10 transition-colors">
+                                    <Phone size={16} /> {talent.phone}
+                                </a>
                             </div>
                         </div>
                     </motion.div>
