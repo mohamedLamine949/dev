@@ -12,6 +12,7 @@ import { AdminModule } from './admin/admin.module';
 import { EmployerModule } from './employers/employer.module';
 import { DocumentsModule } from './documents/documents.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { SavedJobsModule } from './saved-jobs/saved-jobs.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     EmployerModule,
     DocumentsModule,
     NotificationsModule,
+    SavedJobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -81,7 +81,21 @@ export class JobsService {
             this.prisma.job.count({ where }),
         ]);
 
-        return { jobs, total, page, limit, totalPages: Math.ceil(total / limit) };
+        const savedJobIds = userId
+            ? new Set(
+                (await this.prisma.savedJob.findMany({
+                    where: { userId, jobId: { in: jobs.map(job => job.id) } },
+                    select: { jobId: true },
+                })).map(saved => saved.jobId)
+            )
+            : null;
+
+        const jobsWithSavedState = jobs.map(job => ({
+            ...job,
+            isSaved: savedJobIds ? savedJobIds.has(job.id) : false,
+        }));
+
+        return { jobs: jobsWithSavedState, total, page, limit, totalPages: Math.ceil(total / limit) };
     }
 
     async findOne(id: string) {
