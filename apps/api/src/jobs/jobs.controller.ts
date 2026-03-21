@@ -3,6 +3,7 @@ import {
 } from '@nestjs/common';
 import { JobsService, CreateJobDto, JobFilters } from './jobs.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('jobs')
@@ -26,10 +27,12 @@ export class JobsController {
         return this.jobsService.findAll(filters);
     }
 
-    /** Public — get one job */
+    /** Public — get one job (with optional isSaved status) */
+    @UseGuards(OptionalJwtAuthGuard)
     @Get(':id')
-    async findOne(@Param('id') id: string) {
-        const job = await this.jobsService.findOne(id);
+    async findOne(@Param('id') id: string, @Request() req: any) {
+        const userId = req.user?.id;
+        const job = await this.jobsService.findOne(id, userId);
         // Increment view in background (non-blocking)
         this.jobsService.incrementView(id);
         return job;

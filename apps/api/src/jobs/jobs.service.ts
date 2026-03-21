@@ -98,7 +98,7 @@ export class JobsService {
         return { jobs: jobsWithSavedState, total, page, limit, totalPages: Math.ceil(total / limit) };
     }
 
-    async findOne(id: string) {
+    async findOne(id: string, userId?: string) {
         const job = await this.prisma.job.findUnique({
             where: { id },
             include: {
@@ -107,7 +107,16 @@ export class JobsService {
             },
         });
         if (!job) throw new NotFoundException('Offre introuvable');
-        return job;
+
+        let isSaved = false;
+        if (userId) {
+            const saved = await this.prisma.savedJob.findUnique({
+                where: { userId_jobId: { userId, jobId: id } }
+            });
+            isSaved = !!saved;
+        }
+
+        return { ...job, isSaved };
     }
 
     async create(data: CreateJobDto, employerId: string) {

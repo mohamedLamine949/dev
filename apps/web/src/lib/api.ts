@@ -1,5 +1,29 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
+export interface Job {
+    id: string;
+    title: string;
+    type: string;
+    sector: string;
+    regions: string;
+    educationLevel?: string;
+    experienceLevel?: string;
+    description?: string;
+    requirements?: string;
+    salaryMin?: number;
+    salaryMax?: number;
+    deadline: string;
+    publishedAt: string;
+    isDiasporaOpen: boolean;
+    isRemoteAbroad?: boolean;
+    relocationAid?: string;
+    applicationCount?: number;
+    viewCount?: number;
+    isSaved?: boolean;
+    employer: { id?: string; name: string; logoS3Key?: string; isVerified: boolean; description?: string };
+    requiredDocs?: Array<{ id: string; label: string; documentCategory: string; isOptional: boolean }>;
+}
+
 export interface AuthResponse {
     access_token: string;
     user: {
@@ -179,6 +203,23 @@ export const talentsApi = {
     },
     getOne: (token: string, id: string) =>
         fetchAPI<any>(`/talents/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        }),
+};
+
+export const savedJobsApi = {
+    list: (token: string) =>
+        fetchAPI<any[]>('/saved-jobs', {
+            headers: { Authorization: `Bearer ${token}` },
+        }),
+    save: (token: string, jobId: string) =>
+        fetchAPI<any>(`/jobs/${jobId}/save`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+        }),
+    remove: (token: string, jobId: string) =>
+        fetchAPI<any>(`/jobs/${jobId}/save`, {
+            method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         }),
 };
