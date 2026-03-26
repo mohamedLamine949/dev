@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { AlertsService } from '../alerts/alerts.service';
 
 export interface RequiredDocDto {
     documentCategory: string; // CV | PASSEPORT | DIPLOME | ...
@@ -41,7 +43,11 @@ export interface JobFilters {
 
 @Injectable()
 export class JobsService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly notificationsService: NotificationsService,
+        private readonly alertsService: AlertsService,
+    ) { }
 
     async findAll(filters: JobFilters = {}) {
         const { keyword, sector, type, region, educationLevel, isDiaspora, userId, page = 1, limit = 20 } = filters;
@@ -98,7 +104,7 @@ export class JobsService {
         return { jobs: jobsWithSavedState, total, page, limit, totalPages: Math.ceil(total / limit) };
     }
 
-    async findOne(id: string) {
+    async findOne(id: string, userId?: string) {
         const job = await this.prisma.job.findUnique({
             where: { id },
             include: {
@@ -107,7 +113,16 @@ export class JobsService {
             },
         });
         if (!job) throw new NotFoundException('Offre introuvable');
-        return job;
+
+        let isSaved = false;
+        if (userId) {
+            const saved = await this.prisma.savedJob.findUnique({
+                where: { userId_jobId: { userId, jobId: id } }
+            });
+            isSaved = !!saved;
+        }
+
+        return { ...job, isSaved };
     }
 
     async create(data: CreateJobDto, employerId: string) {
@@ -178,10 +193,43 @@ export class JobsService {
         });
         if (!member) throw new ForbiddenException('Accès refusé');
 
-        return this.prisma.job.update({
+        const published = await this.prisma.job.update({
             where: { id },
             data: { status: 'PUBLISHED', publishedAt: new Date() },
+            include: { employer: { select: { name: true } } },
         });
+
+        // Trigger job alert notifications in background (non-blocking)
+        this.triggerAlertNotifications(published).catch(() => { });
+
+        return published;
+    }
+
+    private async triggerAlertNotifications(job: any) {
+        const matches = await this.alertsService.findMatchingUserIds({
+            sector: job.sector,
+            type: job.type,
+            regions: job.regions,
+            isDiasporaOpen: job.isDiasporaOpen,
+            isRemoteAbroad: job.isRemoteAbroad,
+        });
+
+        if (matches.length === 0) return;
+
+        // Deduplicate by userId (one notification per user even if multiple alerts match)
+        const uniqueUserIds = [...new Set(matches.map(m => m.userId))];
+
+        await Promise.all(
+            uniqueUserIds.map(uid =>
+                this.notificationsService.create(
+                    uid,
+                    'JOB_ALERT',
+                    `Nouvelle offre : ${job.title}`,
+                    `${job.employer?.name ?? 'Un employeur'} recrute dans le secteur ${job.sector}`,
+                    `/jobs/${job.id}`,
+                )
+            )
+        );
     }
 
     async close(id: string, userId: string) {

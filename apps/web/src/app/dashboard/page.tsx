@@ -9,7 +9,8 @@ import { motion, Variants } from 'framer-motion';
 import {
     Briefcase, User, Lock, FileText,
     PlusCircle, Building, Megaphone, Inbox,
-    Users, Layers, BarChart3
+    Users, Layers, BarChart3, Bell, Star, Heart,
+    AlertCircle, Clock, ShieldX, CheckCircle2, ArrowRight
 } from 'lucide-react';
 
 const roleLabels: Record<string, string> = { RECRUITER: 'Recruteur', ADMIN: 'Admin', CANDIDATE: 'Candidat' };
@@ -95,13 +96,63 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 </div>
+                {/* Recruiter onboarding banner */}
+                {user.role === 'RECRUITER' && (
+                    <>
+                        {user.employerStatus === null && (
+                            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                                className="mb-6 flex items-start gap-4 p-4 rounded-2xl border border-[#FCD116]/30 bg-[#FCD116]/[0.07]">
+                                <AlertCircle size={20} className="text-[#FCD116] mt-0.5 shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold text-[#FCD116]">Complétez votre profil entreprise</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">Vous devez enregistrer votre entreprise avant de pouvoir publier des offres. C&apos;est rapide !</p>
+                                </div>
+                                <Link href="/dashboard/recruiter/employer?onboarding=1"
+                                    className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-[#FCD116] bg-[#FCD116]/10 border border-[#FCD116]/30 px-3 py-1.5 rounded-lg hover:bg-[#FCD116]/20 transition">
+                                    Créer <ArrowRight size={13} />
+                                </Link>
+                            </motion.div>
+                        )}
+                        {user.employerStatus === 'PENDING' && (
+                            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                                className="mb-6 flex items-start gap-4 p-4 rounded-2xl border border-white/10 bg-white/[0.02]">
+                                <Clock size={20} className="text-[#FCD116] mt-0.5 shrink-0 animate-pulse" />
+                                <div>
+                                    <p className="text-sm font-bold text-white">Vérification en cours</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">Votre profil entreprise est en attente de validation par un administrateur. Assurez-vous d&apos;avoir renseigné votre NIF et RCCM.</p>
+                                </div>
+                            </motion.div>
+                        )}
+                        {user.employerStatus === 'REJECTED' && (
+                            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                                className="mb-6 flex items-start gap-4 p-4 rounded-2xl border border-red-500/30 bg-red-500/[0.07]">
+                                <ShieldX size={20} className="text-red-400 mt-0.5 shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold text-red-400">Vérification refusée</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">Votre profil a été refusé. Corrigez vos informations légales (NIF/RCCM) pour soumettre à nouveau.</p>
+                                </div>
+                                <Link href="/dashboard/recruiter/employer"
+                                    className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-red-400 bg-red-500/10 border border-red-500/30 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition">
+                                    Corriger <ArrowRight size={13} />
+                                </Link>
+                            </motion.div>
+                        )}
+                        {user.employerStatus === 'VERIFIED' && (
+                            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                                className="mb-6 flex items-center gap-3 p-3 rounded-2xl border border-[#14B53A]/25 bg-[#14B53A]/[0.05]">
+                                <CheckCircle2 size={16} className="text-[#14B53A] shrink-0" />
+                                <p className="text-xs text-[#14B53A]/80">Compte entreprise vérifié — vous pouvez publier des offres.</p>
+                            </motion.div>
+                        )}
+                    </>
+                )}
 
                 {/* Action cards */}
                 <motion.div
                     variants={containerVariants}
                     initial="hidden"
                     animate="show"
-                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                    className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
                 >
                     {user.role === 'CANDIDATE' && (
                         <>
@@ -109,6 +160,7 @@ export default function DashboardPage() {
                             <motion.div variants={itemVariants}><ActionCard icon={<User size={24} strokeWidth={1.5} />} title="Mon Profil" desc="Gérer mon CV & infos" href="/dashboard/profile" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<Lock size={24} strokeWidth={1.5} />} title="Mon Coffre-fort" desc="Documents sécurisés" href="/dashboard/documents" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<FileText size={24} strokeWidth={1.5} />} title="Mes candidatures" desc="Suivre mes dossiers" href="/dashboard/applications" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Heart size={24} strokeWidth={1.5} />} title="Mes Favoris" desc="Offres sauvegardées" href="/dashboard/candidate/saved-jobs" /></motion.div>
                         </>
                     )}
                     {user.role === 'RECRUITER' && (
@@ -117,6 +169,7 @@ export default function DashboardPage() {
                             <motion.div variants={itemVariants}><ActionCard icon={<Building size={24} strokeWidth={1.5} />} title="Mon Entreprise" desc="Profil employeur" href="/dashboard/recruiter/employer" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<Megaphone size={24} strokeWidth={1.5} />} title="Mes offres" desc="Gérer mes annonces" href="/jobs" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<Inbox size={24} strokeWidth={1.5} />} title="Candidatures" desc="Examiner les dossiers" href="/dashboard/recruiter/applications" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Star size={24} strokeWidth={1.5} />} title="Trouver des Talents" desc="Recherche avancée" href="/dashboard/recruiter/talents" /></motion.div>
                         </>
                     )}
                     {user.role === 'ADMIN' && (

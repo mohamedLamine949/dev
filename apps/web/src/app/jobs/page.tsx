@@ -4,26 +4,12 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { motion, Variants } from 'framer-motion';
-import { Search, MapPin, Building, Activity, CalendarDays, ExternalLink } from 'lucide-react';
+import { Search, MapPin, Building, Activity, CalendarDays, ExternalLink, Heart } from 'lucide-react';
+import { Job, savedJobsApi } from '@/lib/api';
 
 const SECTORS = ['Agriculture', 'Banque / Finance', 'BTP', 'Commerce', 'Education', 'Energie', 'IT / Télécoms', 'Mines', 'ONG / International', 'Santé', 'Sécurité / Défense', 'Transport / Logistique'];
 const JOB_TYPES = ['CDI', 'CDD', 'STAGE', 'CONCOURS', 'VOLONTARIAT', 'APPRENTISSAGE'];
 const REGIONS = ['Bamako', 'Gao', 'Kayes', 'Kidal', 'Koulikoro', 'Mopti', 'Ségou', 'Sikasso', 'Taoudénit', 'Ménaka', 'Tombouctou'];
-
-interface Job {
-    id: string;
-    title: string;
-    type: string;
-    sector: string;
-    regions: string;
-    salaryMin?: number;
-    salaryMax?: number;
-    deadline: string;
-    publishedAt: string;
-    isDiasporaOpen: boolean;
-    applicationCount: number;
-    employer: { name: string; logoS3Key?: string; isVerified: boolean };
-}
 
 function formatDeadline(deadline: string) {
     const d = new Date(deadline);
@@ -58,12 +44,13 @@ const itemVariants: Variants = {
 };
 
 export default function JobsPage() {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [filters, setFilters] = useState({ q: '', sector: '', type: '', region: '', diaspora: '' });
+    const [processingId, setProcessingId] = useState<string | null>(null);
 
     const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
@@ -87,6 +74,26 @@ export default function JobsPage() {
     }, [API, page, filters, user]);
 
     useEffect(() => { fetchJobs(); }, [fetchJobs]);
+
+    const toggleFavorite = async (e: React.MouseEvent, jobId: string, isSaved: boolean) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!token || !user || user.role !== 'CANDIDATE') return;
+
+        setProcessingId(jobId);
+        try {
+            if (isSaved) {
+                await savedJobsApi.remove(token, jobId);
+            } else {
+                await savedJobsApi.save(token, jobId);
+            }
+            setJobs(prev => prev.map(j => j.id === jobId ? { ...j, isSaved: !isSaved } : j));
+        } catch (err) {
+            console.error('Erreur favori:', err);
+        } finally {
+            setProcessingId(null);
+        }
+    };
 
     const updateFilter = (key: string, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -172,36 +179,52 @@ export default function JobsPage() {
                             const dl = formatDeadline(job.deadline);
                             const regions = (() => { try { return JSON.parse(job.regions); } catch { return [job.regions]; } })();
                             return (
-                                <motion.div key={job.id} variants={itemVariants}>
+                                <motion.div key={job.id} variants={itemVariants} className="relative group">
                                     <Link href={`/jobs/${job.id}`}
-                                        className="group glass-card glass-card-hover flex items-start justify-between gap-4 px-6 py-5 block rounded-2xl">
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                                <span className={`text-[11px] font-semibold border rounded-full px-2.5 py-0.5 ${typeColors[job.type] || 'text-gray-300 border-white/10'}`}>
-                                                    {typeLabels[job.type] || job.type}
-                                                </span>
-                                                {job.isDiasporaOpen && <span className="text-[11px] text-gray-400 border border-white/10 rounded-full px-2.5 py-0.5">🌍 Diaspora</span>}
-                                                {dl.urgent && <span className="text-[11px] text-red-400 border border-red-500/20 rounded-full px-2.5 py-0.5 animate-pulse">{dl.label}</span>}
-                                            </div>
-                                            <h2 className="text-lg font-semibold text-white group-hover:text-[#14B53A] transition-colors truncate">{job.title}</h2>
+                                        className="block glass-card rounded-2xl p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] relative">
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                                    <span className={`text-[10px] uppercase tracking-wider font-black border rounded-md px-2 py-0.5 ${typeColors[job.type] || 'text-gray-300 border-white/10'}`}>
+                                                        {typeLabels[job.type] || job.type}
+                                                    </span>
+                                                    {job.isDiasporaOpen && <span className="text-[10px] uppercase tracking-wider font-black text-gray-400 border border-white/10 rounded-md px-2 py-0.5">🌍 Diaspora</span>}
+                                                    {dl.urgent && <span className="text-[10px] uppercase tracking-wider font-black text-red-500 bg-red-500/10 border border-red-500/20 rounded-md px-2 py-0.5 animate-pulse">{dl.label}</span>}
+                                                </div>
+                                                <h2 className="text-xl font-bold text-white group-hover:text-[#14B53A] transition-colors truncate mb-2 leading-tight">
+                                                    {job.title}
+                                                </h2>
 
-                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mt-2">
-                                                <span className="flex items-center gap-1.5"><Building size={14} className="text-gray-400" /> {job.employer.name}{job.employer.isVerified && <span className="text-[#14B53A]">✓</span>}</span>
-                                                <span className="flex items-center gap-1.5"><Activity size={14} className="text-gray-400" /> {job.sector}</span>
-                                                <span className="flex items-center gap-1.5"><MapPin size={14} className="text-gray-400" /> {regions.join(', ')}</span>
+                                                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500">
+                                                    <span className="flex items-center gap-1.5"><Building size={14} className="text-gray-500" /> {job.employer.name}{job.employer.isVerified && <span className="text-[#14B53A] text-xs">✓</span>}</span>
+                                                    <span className="flex items-center gap-1.5"><Activity size={14} className="text-gray-500" /> {job.sector}</span>
+                                                    <span className="flex items-center gap-1.5"><MapPin size={14} className="text-gray-500" /> {regions.join(', ')}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="text-right flex-shrink-0 flex flex-col justify-between items-end h-[88px]">
-                                            <div className="p-2 rounded-full border border-white/10 text-gray-400 group-hover:text-white group-hover:border-white/30 group-hover:bg-white/5 transition-all">
-                                                <ExternalLink size={16} />
-                                            </div>
-                                            <div className="text-right">
-                                                {(job.salaryMin || job.salaryMax) && (
-                                                    <p className="text-white text-sm font-medium mb-1">
-                                                        {job.salaryMin?.toLocaleString()} – {job.salaryMax?.toLocaleString()} FCFA
-                                                    </p>
+
+                                            <div className="flex flex-col items-end gap-4 h-[88px] justify-between text-right shrink-0">
+                                                {user?.role === 'CANDIDATE' && (
+                                                    <button 
+                                                        onClick={(e) => toggleFavorite(e, job.id, !!job.isSaved)}
+                                                        disabled={processingId === job.id}
+                                                        className={`p-2.5 rounded-xl border transition-all duration-300 ${job.isSaved ? 'bg-red-500/10 border-red-500/30 text-red-500' : 'bg-white/5 border-white/10 text-gray-500 hover:text-white hover:border-white/20'}`}
+                                                    >
+                                                        <Heart size={18} fill={job.isSaved ? "currentColor" : "none"} className={processingId === job.id ? 'animate-pulse' : ''} />
+                                                    </button>
+                                                ) || (
+                                                    <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-600">
+                                                        <ExternalLink size={18} />
+                                                    </div>
                                                 )}
-                                                <p className="text-xs text-gray-600 flex items-center justify-end gap-1"><CalendarDays size={12} /> Expir. : {new Date(job.deadline).toLocaleDateString()}</p>
+
+                                                <div className="flex flex-col items-end">
+                                                    {(job.salaryMin || job.salaryMax) && (
+                                                        <p className="text-white text-sm font-black mb-1">
+                                                            {job.salaryMin?.toLocaleString()} – {job.salaryMax?.toLocaleString()} <span className="text-[10px] text-gray-500 ml-0.5">FCFA</span>
+                                                        </p>
+                                                    )}
+                                                    <p className="text-[11px] text-gray-600 font-medium flex items-center gap-1"><CalendarDays size={12} className="opacity-50" /> Expir. : {new Date(job.deadline).toLocaleDateString()}</p>
+                                                </div>
                                             </div>
                                         </div>
                                     </Link>

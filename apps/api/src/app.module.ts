@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -13,10 +15,14 @@ import { EmployerModule } from './employers/employer.module';
 import { DocumentsModule } from './documents/documents.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SavedJobsModule } from './saved-jobs/saved-jobs.module';
+import { AlertsModule } from './alerts/alerts.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -28,9 +34,9 @@ import { SavedJobsModule } from './saved-jobs/saved-jobs.module';
     DocumentsModule,
     NotificationsModule,
     SavedJobsModule,
+    AlertsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule { }
-
