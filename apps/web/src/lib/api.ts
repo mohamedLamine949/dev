@@ -133,6 +133,44 @@ export const documentsApi = {
     },
 };
 
+export const alertsApi = {
+    list: (token: string) =>
+        fetchAPI<any[]>('/alerts', { headers: { Authorization: `Bearer ${token}` } }),
+
+    create: (token: string, data: {
+        sectors: string[];
+        jobTypes?: string[];
+        regions?: string[];
+        isDiasporaOnly?: boolean;
+        isRemoteOnly?: boolean;
+    }) =>
+        fetchAPI<any>('/alerts', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: JSON.stringify(data),
+        }),
+
+    update: (token: string, id: string, data: Partial<{
+        sectors: string[];
+        jobTypes: string[];
+        regions: string[];
+        isDiasporaOnly: boolean;
+        isRemoteOnly: boolean;
+        isActive: boolean;
+    }>) =>
+        fetchAPI<any>(`/alerts/${id}`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${token}` },
+            body: JSON.stringify(data),
+        }),
+
+    remove: (token: string, id: string) =>
+        fetchAPI<any>(`/alerts/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+        }),
+};
+
 export const profileApi = {
     get: (token: string) => fetchAPI<any>('/profile/me', { headers: { Authorization: `Bearer ${token}` } }),
     update: (token: string, data: any) =>
