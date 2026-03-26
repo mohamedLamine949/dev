@@ -3,6 +3,21 @@ import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
+
+export class VerifyEmployerDto {
+    @IsString()
+    status: string;
+
+    @IsOptional()
+    @IsString()
+    note?: string;
+}
+
+export class ToggleSuspensionDto {
+    @IsBoolean()
+    isSuspended: boolean;
+}
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -21,9 +36,10 @@ export class AdminController {
     }
 
     @Patch('users/:id/suspend')
-    toggleUserSuspension(@Param('id') id: string, @Body('isSuspended') isSuspended: boolean) {
-        return this.adminService.toggleUserSuspension(id, isSuspended);
+    toggleUserSuspension(@Param('id') id: string, @Body() body: ToggleSuspensionDto) {
+        return this.adminService.toggleUserSuspension(id, body.isSuspended);
     }
+
 
     @Get('users/:id')
     getUserDetail(@Param('id') id: string) {
@@ -36,7 +52,7 @@ export class AdminController {
     }
 
     @Patch('employers/:id/verify')
-    verifyEmployer(@Param('id') id: string, @Body() body: { status: string; note?: string }) {
+    verifyEmployer(@Param('id') id: string, @Body() body: VerifyEmployerDto) {
         return this.adminService.verifyEmployer(id, body.status, body.note);
     }
 
