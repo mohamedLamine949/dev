@@ -36,8 +36,8 @@ export class AdminController {
     }
 
     @Patch('employers/:id/verify')
-    verifyEmployer(@Param('id') id: string, @Body('status') status: string, @Body('note') note?: string) {
-        return this.adminService.verifyEmployer(id, status, note);
+    verifyEmployer(@Param('id') id: string, @Body() body: { status: string; note?: string }) {
+        return this.adminService.verifyEmployer(id, body.status, body.note);
     }
 
     @Get('employers/:id')

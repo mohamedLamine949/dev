@@ -65,10 +65,10 @@ export class AdminService {
 
             // 4. Applications Timeline (Last 7 Days)
             this.prisma.$queryRaw<{ date: string, count: bigint }[]>`
-                SELECT DATE(TRUNC("createdAt")) as date, COUNT(*) as count 
-                FROM "Application" 
+                SELECT "createdAt"::date as date, COUNT(*) as count
+                FROM "Application"
                 WHERE "createdAt" >= ${sevenDaysAgo}
-                GROUP BY DATE(TRUNC("createdAt"))
+                GROUP BY "createdAt"::date
                 ORDER BY date ASC
             `,
 
@@ -174,11 +174,11 @@ export class AdminService {
     }
 
     async getEmployers(query: any) {
-        const { page = 1, limit = 20, isVerified, search = '' } = query;
+        const { page = 1, limit = 20, status, search = '' } = query;
         const skip = (page - 1) * limit;
 
         const where: any = {};
-        if (isVerified !== undefined) where.isVerified = isVerified === 'true';
+        if (status) where.verificationStatus = status;
         if (search) {
             where.OR = [
                 { name: { contains: search, mode: 'insensitive' } },
@@ -241,7 +241,7 @@ export class AdminService {
             data: {
                 verificationStatus: status,
                 isVerified: status === 'VERIFIED',
-                verificationNote: note
+                verificationNote: note ?? null,
             },
             include: { members: true },
         });
