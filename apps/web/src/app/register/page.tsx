@@ -142,7 +142,12 @@ export default function RegisterPage() {
                 role: form.role,
                 email: form.email || undefined,
             });
-            router.push('/dashboard');
+            // Recruiter → go directly to company profile creation
+            if (form.role === 'RECRUITER') {
+                router.push('/dashboard/recruiter/employer?onboarding=1');
+            } else {
+                router.push('/dashboard');
+            }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : "Erreur d'inscription");
         } finally {
@@ -183,6 +188,16 @@ export default function RegisterPage() {
                         </button>
                     ))}
                 </div>
+
+                {/* Recruiter contextual note */}
+                {form.role === 'RECRUITER' && (
+                    <div className="mb-4 p-3.5 rounded-xl border border-[#FCD116]/20 bg-[#FCD116]/[0.05] text-xs text-[#FCD116]/80 flex items-start gap-2.5">
+                        <span className="shrink-0 mt-0.5">🏢</span>
+                        <span>
+                            Après votre inscription, vous créerez le profil de votre entreprise (NIF, RCCM…). L&apos;admin validera votre compte avant que vous puissiez publier des offres.
+                        </span>
+                    </div>
+                )}
 
                 <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] p-7">
                     <form onSubmit={handleSubmit} className="space-y-4">

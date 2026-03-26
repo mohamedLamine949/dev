@@ -10,6 +10,7 @@ interface User {
     firstName: string;
     lastName: string;
     role: string;
+    employerStatus: string | null;
 }
 
 interface AuthContextType {
@@ -40,10 +41,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const saveAuth = (res: AuthResponse) => {
+        const userToStore: User = {
+            id: res.user.id,
+            phone: res.user.phone,
+            email: res.user.email,
+            firstName: res.user.firstName,
+            lastName: res.user.lastName,
+            role: res.user.role,
+            employerStatus: (res.user as any).employerStatus ?? null,
+        };
         localStorage.setItem('malilink_token', res.access_token);
-        localStorage.setItem('malilink_user', JSON.stringify(res.user));
+        localStorage.setItem('malilink_user', JSON.stringify(userToStore));
         setToken(res.access_token);
-        setUser(res.user);
+        setUser(userToStore);
     };
 
     const login = async (identifier: string, password: string) => {
