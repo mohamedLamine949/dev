@@ -1,4 +1,5 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UnauthorizedException, BadRequestException, UsePipes, ValidationPipe } from '@nestjs/common';
+import { RegisterDto } from './register.dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 
@@ -10,13 +11,8 @@ export class AuthController {
     ) { }
 
     @Post('register')
-    async register(@Body() body: any) {
-        // Phone is now the required primary identifier
-        if (!body.phone || !body.password || !body.firstName || !body.lastName || !body.country) {
-            throw new BadRequestException(
-                'Champs obligatoires manquants : téléphone, mot de passe, prénom, nom, pays'
-            );
-        }
+    @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: false }))
+    async register(@Body() body: RegisterDto) {
 
         const user = await this.usersService.create({
             phone: body.phone,
