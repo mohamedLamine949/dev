@@ -65,7 +65,7 @@ export default function TalentDetailPage() {
             </div>
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="text-white font-bold tracking-tight">MaliLink</span>
+                    <span className="text-white font-bold tracking-tight">MaliEmploi</span>
                 </Link>
                 <div className="flex items-center gap-4">
                     <NotificationBell />
@@ -97,7 +97,7 @@ export default function TalentDetailPage() {
                         <div className="flex-1 text-center md:text-left space-y-4">
                             <div>
                                 <h1 className="text-4xl font-black tracking-tighter text-white">{talent.firstName} {talent.lastName}</h1>
-                                <p className="text-[#FCD116] text-xl font-bold mt-1">{profile?.title || 'Candidat MaliLink'}</p>
+                                <p className="text-[#FCD116] text-xl font-bold mt-1">{profile?.title || 'Candidat MaliEmploi'}</p>
                             </div>
 
                             <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-gray-400 font-medium">

@@ -168,7 +168,7 @@ export default function RegisterPage() {
             <div className="w-full max-w-md">
                 <div className="mb-8 text-center">
                     <Link href="/" className="inline-flex items-center gap-2 mb-6">
-                        <span className="text-white font-bold text-xl tracking-tight">MaliLink</span>
+                        <span className="text-white font-bold text-xl tracking-tight">MaliEmploi</span>
                         <span className="text-[11px] text-[#FCD116]/80 font-medium border border-[#FCD116]/30 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
                     </Link>
                     <h1 className="text-2xl font-bold text-white tracking-tight">Créer un compte</h1>

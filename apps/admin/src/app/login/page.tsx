@@ -44,7 +44,7 @@ export default function LoginPage() {
 
                 <div className="flex flex-col items-center mb-10 relative">
                     <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center text-white font-bold text-3xl shadow-2xl shadow-green-600/40 mb-4 animate-bounce-subtle">ML</div>
-                    <h1 className="text-2xl font-bold tracking-tight">MaliLink Admin</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">MaliEmploi Admin</h1>
                     <p className="text-slate-500 text-sm mt-1 uppercase tracking-widest font-bold">Connexion Réservée</p>
                 </div>
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
                             value={identifier}
                             onChange={(e) => setIdentifier(e.target.value)}
                             className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all text-white placeholder-slate-600"
-                            placeholder="votre.nom@malilink.ml"
+                            placeholder="votre.nom@maliemploi.ml"
                         />
                     </div>
 

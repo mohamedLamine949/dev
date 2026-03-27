@@ -62,14 +62,14 @@ const partners = [
 
 const testimonials = [
   {
-    quote: "Grâce à MaliLink, j'ai trouvé mon poste de comptable en seulement 3 semaines. Le coffre-fort de documents m'a vraiment simplifié la vie.",
+    quote: "Grâce à MaliEmploi, j'ai trouvé mon poste de comptable en seulement 3 semaines. Le coffre-fort de documents m'a vraiment simplifié la vie.",
     name: "Aïssata Coulibaly",
     role: "Comptable — BDM·SA",
     city: "Bamako",
     initial: "A",
   },
   {
-    quote: "Nous utilisons MaliLink pour tous nos recrutements depuis 6 mois. La qualité des profils et la rapidité du processus sont incomparables.",
+    quote: "Nous utilisons MaliEmploi pour tous nos recrutements depuis 6 mois. La qualité des profils et la rapidité du processus sont incomparables.",
     name: "Moussa Diallo",
     role: "DRH — Groupe Mory",
     city: "Bamako",
@@ -106,7 +106,7 @@ export default function Home() {
       <nav className="fixed top-[3px] left-0 right-0 z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl">
         <div className="mx-auto max-w-6xl px-6 flex h-14 items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold tracking-tight text-lg">MaliLink</span>
+            <span className="text-white font-bold tracking-tight text-lg">MaliEmploi</span>
             <span className="text-[11px] text-[#FCD116]/80 font-medium border border-[#FCD116]/30 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
           </div>
           <div className="flex items-center gap-2">
@@ -151,7 +151,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-            MaliLink connecte les talents maliens — et la diaspora — aux meilleures
+            MaliEmploi connecte les talents maliens — et la diaspora — aux meilleures
             opportunités. Un coffre-fort de documents, des employeurs vérifiés,
             un processus de candidature simplifié.
           </p>
@@ -304,7 +304,7 @@ export default function Home() {
             Prêt à commencer ?
           </h2>
           <p className="text-gray-500 mb-8">
-            Rejoignez des milliers de candidats et recruteurs qui font confiance à MaliLink. Gratuit, rapide, sécurisé.
+            Rejoignez des milliers de candidats et recruteurs qui font confiance à MaliEmploi. Gratuit, rapide, sécurisé.
           </p>
           <div className="flex gap-3 justify-center">
             <Link href="/register"
@@ -323,7 +323,7 @@ export default function Home() {
       <footer className="border-t border-white/[0.06] py-10">
         <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold text-sm">MaliLink</span>
+            <span className="text-white font-bold text-sm">MaliEmploi</span>
             <span className="text-gray-600 text-xs">🇲🇱 Plateforme nationale de l&apos;emploi</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-gray-600">
@@ -331,7 +331,7 @@ export default function Home() {
             <Link href="/register" className="hover:text-gray-400 transition-colors">Inscription</Link>
             <Link href="/login" className="hover:text-gray-400 transition-colors">Connexion</Link>
           </div>
-          <p className="text-xs text-gray-700">© 2026 MaliLink. Fait au Mali 🇲🇱</p>
+          <p className="text-xs text-gray-700">© 2026 MaliEmploi. Fait au Mali 🇲🇱</p>
         </div>
       </footer>
 

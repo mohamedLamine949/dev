@@ -42,7 +42,7 @@ export default function RegisterScreen() {
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
                 <View style={styles.card}>
-                    <Text style={styles.logo}>MaliLink</Text>
+                    <Text style={styles.logo}>MaliEmploi</Text>
                     <Text style={styles.subtitle}>Créez votre compte gratuitement</Text>
 
                     <View style={styles.row}>

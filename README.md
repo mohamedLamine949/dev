@@ -1,6 +1,6 @@
-# 🇲🇱 MaliLink - Plateforme d'Emploi Moderne
+# 🇲🇱 MaliEmploi - Plateforme d'Emploi Moderne
 
-MaliLink est une plateforme de recrutement innovante dédiée au marché malien, offrant une expérience fluide pour les candidats et les recruteurs.
+MaliEmploi est une plateforme de recrutement innovante dédiée au marché malien, offrant une expérience fluide pour les candidats et les recruteurs.
 
 ## 🚀 Architecture
 
@@ -35,7 +35,7 @@ Le projet est un monorepo géré avec **pnpm** et **Turborepo** :
 3. **Configuration de la Base de Données (Supabase)**
    Pour que le projet fonctionne, vous devez créer une instance de base de données PostgreSQL. Nous recommandons **Supabase** car c'est gratuit et rapide à mettre en place :
    - Créez un compte sur [supabase.com](https://supabase.com).
-   - Créez un nouveau projet (ex: "MaliLink").
+   - Créez un nouveau projet (ex: "MaliEmploi").
    - Allez dans **Project Settings > Database** et récupérez votre **Connection String** (format URI).
    - **Important** : Remplacez le tag `[YOUR-PASSWORD]` par le mot de passe que vous avez défini lors de la création du projet.
    - Assurez-vous d'utiliser le mode "Direct connection" (port 5432).
@@ -67,7 +67,7 @@ L'application sera disponible sur :
 - **Panneau Admin** : [http://localhost:3002](http://localhost:3002)
 
 ### Identifiants Admin (Base)
-- **Email** : `admin@malilink.ml`
+- **Email** : `admin@maliemploi.ml`
 - **Mot de passe** : `Admin123!`
 
 ## ✨ Nouveau Design

@@ -83,7 +83,7 @@ export default function ApplicationDetailPage() {
             </div>
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="text-white font-bold tracking-tight">MaliLink</span>
+                    <span className="text-white font-bold tracking-tight">MaliEmploi</span>
                 </Link>
                 <div className="flex items-center gap-4">
                     <NotificationBell />

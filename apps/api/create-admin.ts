@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-    const adminEmail = 'admin@malilink.ml';
+    const adminEmail = 'admin@maliemploi.ml';
     const adminPhone = '70000000';
     const password = 'AdminPassword123!';
 
@@ -30,7 +30,7 @@ async function main() {
                 phone: adminPhone,
                 passwordHash,
                 firstName: 'Admin',
-                lastName: 'MaliLink',
+                lastName: 'MaliEmploi',
                 country: 'Mali',
                 role: 'ADMIN'
             }
