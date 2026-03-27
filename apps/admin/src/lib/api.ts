@@ -18,9 +18,13 @@ export interface LoginPayload {
 }
 
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const { headers: extraHeaders, ...restOptions } = options;
     const res = await fetch(`${API_URL}${endpoint}`, {
-        headers: { 'Content-Type': 'application/json', ...options.headers },
-        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...(extraHeaders as Record<string, string>),
+        },
+        ...restOptions,
     });
 
     const data = await res.json();

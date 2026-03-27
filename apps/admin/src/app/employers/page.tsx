@@ -67,8 +67,8 @@ export default function EmployersPage() {
             } : e));
             setVerifyModal({ employer: null, type: null });
             setNote('');
-        } catch (err) {
-            alert('Erreur lors de la mise à jour');
+        } catch (err: any) {
+            alert('Erreur lors de la mise à jour: ' + err.message);
         } finally {
             setProcessing(false);
         }
