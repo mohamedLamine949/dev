@@ -25,8 +25,15 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
 
     const data = await res.json();
 
+    if (res.status === 401 && endpoint !== '/auth/login') {
+        localStorage.removeItem('malilink_token');
+        localStorage.removeItem('malilink_user');
+        window.location.href = '/login';
+        throw new Error('Session expirée');
+    }
+
     if (!res.ok) {
-        throw new Error(data?.message || 'Erreur réseau');
+        throw new Error(`[${res.status}] ${endpoint}: ${Array.isArray(data?.message) ? data.message.join(', ') : data?.message || 'Erreur réseau'}`);
     }
 
     return data as T;

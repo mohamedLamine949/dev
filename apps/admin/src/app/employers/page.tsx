@@ -38,22 +38,16 @@ export default function EmployersPage() {
         setLoading(true);
         try {
             let params = `page=${page}&search=${search}`;
-            if (filter === 'VERIFIED') params += '&isVerified=true';
-            if (filter === 'PENDING') params += '&isVerified=false';
+            if (filter !== 'ALL') params += `&status=${filter}`;
             const data = await adminApi.getEmployers(token, params);
-
-            let emp = data.employers;
             setTotal(data.total);
-            if (filter === 'REJECTED') emp = emp.filter((e: Employer) => e.verificationStatus === 'REJECTED');
-            if (filter === 'PENDING') emp = emp.filter((e: Employer) => e.verificationStatus === 'PENDING');
-
-            setEmployers(emp);
+            setEmployers(data.employers);
         } catch (err) {
             console.error(err);
         } finally {
             setLoading(false);
         }
-    }, [token, user, page, filter]);
+    }, [token, user, page, filter, search]);
 
     useEffect(() => {
         fetchEmployers();

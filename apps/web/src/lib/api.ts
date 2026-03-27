@@ -85,7 +85,7 @@ export const employerApi = {
             headers: { Authorization: `Bearer ${token}` },
             body: JSON.stringify(data),
         }),
-    update: (token: string, data: { nif?: string; rccm?: string; description?: string }) =>
+    update: (token: string, data: { category?: string; nif?: string; rccm?: string; description?: string }) =>
         fetchAPI('/employers/me', {
             method: 'PATCH',
             headers: { Authorization: `Bearer ${token}` },

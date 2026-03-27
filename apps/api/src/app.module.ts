@@ -16,6 +16,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SavedJobsModule } from './saved-jobs/saved-jobs.module';
 import { AlertsModule } from './alerts/alerts.module';
+import { TalentModule } from './talents/talent.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AlertsModule } from './alerts/alerts.module';
     NotificationsModule,
     SavedJobsModule,
     AlertsModule,
+    TalentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -45,18 +45,22 @@ export class EmployerController {
             throw new BadRequestException('Le nom et la catégorie sont obligatoires');
         }
 
-        const slug = toSlug(body.name);
+        // 1:1 enforcement — one recruiter account = one company profile
+        const existingMembership = await this.prisma.employerMember.findFirst({ where: { userId } });
+        if (existingMembership) {
+            throw new BadRequestException('Vous avez déjà un profil entreprise. Utilisez la mise à jour pour modifier vos informations.');
+        }
 
+        const slug = toSlug(body.name);
         if (!slug) {
             throw new BadRequestException('Le nom de l\'entreprise est invalide');
         }
 
-        // Check if employer with same name/slug exists
         const existing = await this.prisma.employer.findFirst({
             where: { OR: [{ name: body.name }, { slug }] }
         });
         if (existing) {
-            throw new BadRequestException('Un employeur avec ce nom existe déjà');
+            throw new BadRequestException('Une entreprise avec ce nom existe déjà');
         }
 
         let employer;
@@ -67,28 +71,21 @@ export class EmployerController {
                     slug,
                     category: body.category,
                     description: body.description || null,
+                    nif: body.nif || null,
+                    rccm: body.rccm || null,
                 }
             });
         } catch (e: any) {
-            // Prisma unique constraint violation (P2002)
             if (e?.code === 'P2002') {
-                throw new BadRequestException('Un employeur avec ce nom ou slug existe déjà. Essayez un nom légèrement différent.');
+                throw new BadRequestException('Une entreprise avec ce nom existe déjà. Essayez un nom légèrement différent.');
             }
             console.error('[EmployerController] create error:', e);
             throw new BadRequestException(`Erreur lors de la création: ${e.message}`);
         }
 
-        // Link the creator as first member (ignore if already linked)
-        try {
-            await this.prisma.employerMember.create({
-                data: { employerId: employer.id, userId, role: 'RECRUITER' }
-            });
-        } catch (e: any) {
-            if (e?.code !== 'P2002') {
-                console.error('[EmployerController] member link error:', e);
-            }
-            // P2002 = already linked, that's fine
-        }
+        await this.prisma.employerMember.create({
+            data: { employerId: employer.id, userId, role: 'RECRUITER' }
+        });
 
         return employer;
     }
@@ -114,13 +111,22 @@ export class EmployerController {
         });
         if (!membership) throw new BadRequestException('Aucune entreprise associée à ce compte');
 
+        const updateData: any = {};
+        if (body.category !== undefined) updateData.category = body.category;
+        if (body.description !== undefined) updateData.description = body.description || null;
+        if (body.nif !== undefined) updateData.nif = body.nif || null;
+        if (body.rccm !== undefined) updateData.rccm = body.rccm || null;
+
+        // If NIF/RCCM are updated while status is REJECTED, reset to PENDING for re-review
+        if ((body.nif !== undefined || body.rccm !== undefined) && membership.employer.verificationStatus === 'REJECTED') {
+            updateData.verificationStatus = 'PENDING';
+            updateData.isVerified = false;
+            updateData.verificationNote = null;
+        }
+
         return this.prisma.employer.update({
             where: { id: membership.employerId },
-            data: {
-                nif: body.nif || undefined,
-                rccm: body.rccm || undefined,
-                description: body.description || undefined,
-            },
+            data: updateData,
         });
     }
 

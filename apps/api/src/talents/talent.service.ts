@@ -28,7 +28,7 @@ export class TalentService {
             ];
         }
 
-        if (isDiaspora !== undefined) {
+        if (isDiaspora !== undefined && isDiaspora !== '') {
             where.candidateProfile = {
                 ...where.candidateProfile,
                 isDiaspora: isDiaspora === 'true',
@@ -117,4 +117,3 @@ export class TalentService {
         });
     }
 }
-

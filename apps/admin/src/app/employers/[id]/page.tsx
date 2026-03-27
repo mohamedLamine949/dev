@@ -175,13 +175,13 @@ export default function EmployerDetailPage({ params }: { params: Promise<{ id: s
 
                     {/* Sidebar Column */}
                     <div className="space-y-8">
-                        {/* Members */}
+                        {/* Responsable RH (1:1 model) */}
                         <section className="bg-white/[0.02] border border-white/5 p-6 rounded-3xl">
                             <h3 className="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <Users size={16} className="text-blue-400" /> Membres ({employer.members?.length || 0})
+                                <Users size={16} className="text-blue-400" /> Responsable RH
                             </h3>
                             <div className="space-y-4">
-                                {employer.members?.map((m: any) => (
+                                {employer.members?.slice(0, 1).map((m: any) => (
                                     <div key={m.userId} className="flex items-center gap-3 p-3 bg-white/[0.01] border border-white/5 rounded-2xl">
                                         <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 border border-white/5">
                                             {m.user.avatarS3Key ? (
@@ -192,7 +192,7 @@ export default function EmployerDetailPage({ params }: { params: Promise<{ id: s
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-xs font-bold text-white truncate">{m.user.firstName} {m.user.lastName}</p>
-                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate">{m.role}</p>
+                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest truncate">{m.user.phone}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -204,12 +204,27 @@ export default function EmployerDetailPage({ params }: { params: Promise<{ id: s
                             <h3 className="text-[10px] font-black text-green-500 uppercase tracking-widest mb-4">Résumé Administratif</h3>
                             <div className="space-y-4 text-sm">
                                 <div className="flex justify-between">
-                                    <span className="text-slate-500">Statut Verification</span>
-                                    <span className={`font-bold ${employer.isVerified ? 'text-green-500' : 'text-amber-500'}`}>{employer.verificationStatus}</span>
+                                    <span className="text-slate-500">Statut</span>
+                                    <span className={`font-bold ${employer.verificationStatus === 'VERIFIED' ? 'text-green-500' : employer.verificationStatus === 'REJECTED' ? 'text-red-400' : 'text-amber-500'}`}>
+                                        {employer.verificationStatus}
+                                    </span>
                                 </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-500">NIF</span>
+                                    <span className={`font-bold text-xs ${employer.nif ? 'text-white' : 'text-red-400'}`}>{employer.nif || 'Manquant ⚠'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-500">RCCM</span>
+                                    <span className={`font-bold text-xs ${employer.rccm ? 'text-white' : 'text-red-400'}`}>{employer.rccm || 'Manquant ⚠'}</span>
+                                </div>
+                                {(!employer.nif || !employer.rccm) && employer.verificationStatus === 'PENDING' && (
+                                    <div className="pt-3 border-t border-white/5">
+                                        <p className="text-[10px] text-amber-400/80">Informations légales incomplètes. Attendez que l'employeur renseigne son NIF et RCCM avant de valider.</p>
+                                    </div>
+                                )}
                                 {employer.verificationNote && (
                                     <div className="pt-3 border-t border-white/5">
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Note de validation</p>
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Note de refus</p>
                                         <p className="text-slate-400 italic text-xs">{employer.verificationNote}</p>
                                     </div>
                                 )}

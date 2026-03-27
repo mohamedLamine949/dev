@@ -24,7 +24,11 @@ export default function LoginPage() {
         setError('');
         setLoading(true);
         try {
-            await login(identifier, password);
+            const loggedUser = await login(identifier, password);
+            if (loggedUser.role !== 'ADMIN') {
+                setError('Accès refusé. Ce panneau est réservé aux administrateurs.');
+                return;
+            }
             router.push('/');
         } catch (err: any) {
             setError(err.message || 'Identifiants invalides');

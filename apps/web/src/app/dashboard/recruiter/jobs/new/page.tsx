@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { motion, Variants } from 'framer-motion';
-import { Briefcase, MapPin, GraduationCap, AlignLeft, FileText, DollarSign, Globe2, PlusCircle, CheckCircle2 } from 'lucide-react';
+import { Briefcase, MapPin, GraduationCap, AlignLeft, FileText, DollarSign, Globe2, PlusCircle, CheckCircle2, Clock, ShieldX } from 'lucide-react';
 
 const SECTORS = ['Agriculture', 'Banque / Finance', 'BTP', 'Commerce', 'Education', 'Energie', 'IT / Télécoms', 'Mines', 'ONG / International', 'Santé', 'Sécurité / Défense', 'Transport / Logistique'];
 const JOB_TYPES = [
@@ -49,6 +49,7 @@ export default function NewJobPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
     const [hasEmployer, setHasEmployer] = useState<boolean | null>(null);
+    const [employerStatus, setEmployerStatus] = useState<string | null>(null);
 
     const toggleReqDoc = (catKey: string, catLabel: string) => {
         setReqDocs(prev => {
@@ -71,7 +72,15 @@ export default function NewJobPage() {
         if (token) {
             fetch(`${API}/employers/me`, { headers: { Authorization: `Bearer ${token}` } })
                 .then(res => res.json())
-                .then(data => { setHasEmployer(data && data.length > 0); setLoading(false); })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        setHasEmployer(true);
+                        setEmployerStatus(data[0].verificationStatus ?? null);
+                    } else {
+                        setHasEmployer(false);
+                    }
+                    setLoading(false);
+                })
                 .catch(() => setLoading(false));
         }
     }, [token, API]);
@@ -130,6 +139,44 @@ export default function NewJobPage() {
                         Enregistrer mon entreprise
                     </Link>
                     <Link href="/dashboard" className="block mt-4 text-xs text-gray-500 hover:text-white transition">Plus tard</Link>
+                </div>
+            </div>
+        );
+    }
+
+    if (employerStatus === 'PENDING') {
+        return (
+            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6">
+                <div className="max-w-md w-full bg-white/[0.02] border border-[#FCD116]/20 rounded-3xl p-8 text-center backdrop-blur-md">
+                    <div className="flex justify-center mb-4 text-[#FCD116]"><Clock size={48} strokeWidth={1.5} /></div>
+                    <h1 className="text-xl font-bold text-white mb-2">Vérification en cours</h1>
+                    <p className="text-gray-400 text-sm mb-4">
+                        Votre compte entreprise est en attente de validation par un administrateur.
+                        Assurez-vous d'avoir renseigné votre <strong className="text-white">NIF</strong> et <strong className="text-white">RCCM</strong> pour accélérer le processus.
+                    </p>
+                    <p className="text-[#FCD116]/70 text-xs mb-8">Vous recevrez une notification dès que votre compte sera validé.</p>
+                    <Link href="/dashboard/recruiter/employer" className="block w-full bg-[#FCD116]/10 border border-[#FCD116]/30 text-[#FCD116] font-semibold py-3 rounded-xl transition hover:bg-[#FCD116]/20">
+                        Compléter les infos légales
+                    </Link>
+                    <Link href="/dashboard" className="block mt-4 text-xs text-gray-500 hover:text-white transition">Retour au tableau de bord</Link>
+                </div>
+            </div>
+        );
+    }
+
+    if (employerStatus === 'REJECTED') {
+        return (
+            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-6">
+                <div className="max-w-md w-full bg-white/[0.02] border border-red-500/20 rounded-3xl p-8 text-center backdrop-blur-md">
+                    <div className="flex justify-center mb-4 text-red-500"><ShieldX size={48} strokeWidth={1.5} /></div>
+                    <h1 className="text-xl font-bold text-white mb-2">Vérification refusée</h1>
+                    <p className="text-gray-400 text-sm mb-4">
+                        Votre demande de vérification a été refusée. Veuillez corriger les informations de votre entreprise (NIF / RCCM) et contacter l'administrateur.
+                    </p>
+                    <Link href="/dashboard/recruiter/employer" className="block w-full bg-red-500/10 border border-red-500/30 text-red-400 font-semibold py-3 rounded-xl transition hover:bg-red-500/20">
+                        Mettre à jour mon entreprise
+                    </Link>
+                    <Link href="/dashboard" className="block mt-4 text-xs text-gray-500 hover:text-white transition">Retour au tableau de bord</Link>
                 </div>
             </div>
         );

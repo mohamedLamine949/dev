@@ -138,6 +138,11 @@ export class JobsService {
         const employer = await this.prisma.employer.findUnique({ where: { id: employerId } });
         if (!employer) throw new NotFoundException('Compte employeur introuvable');
 
+        // Check employer is verified
+        if (employer.verificationStatus !== 'VERIFIED') {
+            throw new ForbiddenException('Votre compte entreprise doit être vérifié par un administrateur avant de pouvoir publier des offres. Veuillez renseigner votre NIF et RCCM puis attendre la validation.');
+        }
+
         // Max 15 active jobs
         const activeCount = await this.prisma.job.count({
             where: { employerId, status: { in: ['DRAFT', 'PUBLISHED'] } }
@@ -192,6 +197,11 @@ export class JobsService {
             where: { userId, employerId: job.employerId },
         });
         if (!member) throw new ForbiddenException('Accès refusé');
+
+        const employer = await this.prisma.employer.findUnique({ where: { id: job.employerId } });
+        if (!employer || employer.verificationStatus !== 'VERIFIED') {
+            throw new ForbiddenException('Votre compte entreprise doit être vérifié par un administrateur avant de pouvoir publier des offres.');
+        }
 
         const published = await this.prisma.job.update({
             where: { id },
