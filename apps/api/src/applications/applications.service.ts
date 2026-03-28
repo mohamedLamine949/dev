@@ -112,10 +112,10 @@ export class ApplicationsService {
         // Increment job application count
         await this.prisma.job.update({ where: { id: jobId }, data: { applicationCount: { increment: 1 } } });
 
-        // -- Notify Recruiters --
-        const employerMembers = await this.prisma.employerMember.findMany({
-            where: { employerId: job.employerId }
-        });
+        // -- Notify Recruiters (only for internal jobs with an employer) --
+        const employerMembers = job.employerId
+            ? await this.prisma.employerMember.findMany({ where: { employerId: job.employerId } })
+            : [];
         for (const member of employerMembers) {
             await this.notifications.create(
                 member.userId,
@@ -168,7 +168,7 @@ export class ApplicationsService {
         });
         if (!job) throw new NotFoundException('Offre introuvable');
 
-        const isMember = job.employer.members.some((m: any) => m.userId === userId);
+        const isMember = job.employer?.members.some((m: any) => m.userId === userId) ?? false;
         if (!isMember) throw new ForbiddenException('Vous n\'êtes pas autorisé à voir les candidatures pour cette offre');
 
         const page = filters.page || 1;
@@ -201,7 +201,7 @@ export class ApplicationsService {
         });
         if (!application) throw new NotFoundException('Candidature introuvable');
 
-        const isMember = application.job.employer.members.some((m: any) => m.userId === userId);
+        const isMember = application.job.employer?.members.some((m: any) => m.userId === userId) ?? false;
         if (!isMember) throw new ForbiddenException('Vous n\'êtes pas autorisé à modifier cette candidature');
 
         const validStatuses = ['SENT', 'REVIEWED', 'SHORTLISTED', 'INTERVIEW', 'ACCEPTED', 'REJECTED'];
@@ -245,7 +245,7 @@ export class ApplicationsService {
 
         // Verify access: candidate or recruiter
         const isCandidate = application.userId === userId;
-        const isRecruiter = application.job.employer.members.some((m: any) => m.userId === userId);
+        const isRecruiter = application.job.employer?.members.some((m: any) => m.userId === userId) ?? false;
         if (!isCandidate && !isRecruiter) throw new ForbiddenException('Accès non autorisé');
 
         // Mark unread messages as read
@@ -270,7 +270,7 @@ export class ApplicationsService {
         if (!application) throw new NotFoundException('Candidature introuvable');
 
         const isCandidate = application.userId === userId;
-        const isRecruiter = application.job.employer.members.some((m: any) => m.userId === userId);
+        const isRecruiter = application.job.employer?.members.some((m: any) => m.userId === userId) ?? false;
         if (!isCandidate && !isRecruiter) throw new ForbiddenException('Accès non autorisé');
 
         const message = await this.prisma.message.create({
@@ -288,7 +288,7 @@ export class ApplicationsService {
         // -- Notify the recipient --
         if (isCandidate) {
             // Received by Recruiter(s)
-            application.job.employer.members.forEach(member => {
+            application.job.employer?.members.forEach(member => {
                 this.notifications.create(
                     member.userId,
                     'NEW_MESSAGE',
@@ -338,7 +338,7 @@ export class ApplicationsService {
             where: { id: application.jobId },
             include: { employer: { include: { members: true } } },
         });
-        const isRecruiter = job?.employer.members.some((m: any) => m.userId === userId);
+        const isRecruiter = job?.employer?.members.some((m: any) => m.userId === userId) ?? false;
         if (!isCandidate && !isRecruiter) throw new ForbiddenException('Accès non autorisé');
 
         return application;
