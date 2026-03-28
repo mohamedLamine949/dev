@@ -60,15 +60,17 @@ export class JobsService {
 
         if (keyword) {
             where.OR = [
-                { title: { contains: keyword } },
-                { description: { contains: keyword } },
-                { sector: { contains: keyword } },
+                { title: { contains: keyword, mode: 'insensitive' } },
+                { description: { contains: keyword, mode: 'insensitive' } },
+                { sector: { contains: keyword, mode: 'insensitive' } },
+                { externalCompany: { contains: keyword, mode: 'insensitive' } },
+                { employer: { is: { name: { contains: keyword, mode: 'insensitive' } } } },
             ];
         }
-        if (sector) where.sector = sector;
-        if (type) where.type = type;
-        if (region) where.regions = { contains: region };
-        if (educationLevel) where.educationLevel = { contains: educationLevel };
+        if (sector) where.sector = { equals: sector, mode: 'insensitive' };
+        if (type) where.type = { equals: type, mode: 'insensitive' };
+        if (region) where.regions = { contains: region, mode: 'insensitive' };
+        if (educationLevel) where.educationLevel = { contains: educationLevel, mode: 'insensitive' };
         if (isDiaspora) where.isDiasporaOpen = true;
         
         // Hide jobs the user has already applied to
@@ -193,6 +195,7 @@ export class JobsService {
 
     async publish(id: string, userId: string) {
         const job = await this.findOne(id);
+        if (!job.employerId) throw new ForbiddenException('Impossible de modifier une offre externe');
         const member = await this.prisma.employerMember.findFirst({
             where: { userId, employerId: job.employerId },
         });
@@ -244,6 +247,7 @@ export class JobsService {
 
     async close(id: string, userId: string) {
         const job = await this.findOne(id);
+        if (!job.employerId) throw new ForbiddenException('Impossible de modifier une offre externe');
         const member = await this.prisma.employerMember.findFirst({
             where: { userId, employerId: job.employerId },
         });

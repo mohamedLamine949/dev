@@ -77,6 +77,7 @@ async function main() {
                     // La date limite est par défaut dans 30 jours pour les offres scrappées
                     deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), 
                     status: 'PUBLISHED', // Publier directement
+                    publishedAt: new Date(), // Important for sorting
                 }
             });
             imported++;
