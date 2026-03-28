@@ -196,7 +196,7 @@ export default function JobsPage() {
                                                 </h2>
 
                                                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500">
-                                                    <span className="flex items-center gap-1.5"><Building size={14} className="text-gray-500" /> {job.employer.name}{job.employer.isVerified && <span className="text-[#14B53A] text-xs">✓</span>}</span>
+                                                    <span className="flex items-center gap-1.5"><Building size={14} className="text-gray-500" /> {job.isExternal ? job.externalCompany : job.employer?.name}{job.employer?.isVerified && <span className="text-[#14B53A] text-xs">✓</span>}{job.isExternal && <span className="text-[10px] uppercase font-bold text-blue-400 border border-blue-400/20 bg-blue-400/10 rounded px-1.5 py-0.5 ml-1">Externe</span>}</span>
                                                     <span className="flex items-center gap-1.5"><Activity size={14} className="text-gray-500" /> {job.sector}</span>
                                                     <span className="flex items-center gap-1.5"><MapPin size={14} className="text-gray-500" /> {regions.join(', ')}</span>
                                                 </div>

@@ -149,7 +149,7 @@ export default function JobDetailPage() {
                         </div>
                         <h1 className="text-2xl font-bold text-white tracking-tight mb-2 relative z-10">{job.title}</h1>
                         <p className="text-gray-400 flex items-center gap-2 relative z-10">
-                            <Building size={16} /> {job.employer.name}{job.employer.isVerified && <CheckCircle2 size={16} className="text-[#14B53A]" />}
+                            <Building size={16} /> {job.isExternal ? job.externalCompany : job.employer?.name}{job.employer?.isVerified && <CheckCircle2 size={16} className="text-[#14B53A]" />}
                         </p>
                         <div className="flex flex-wrap gap-x-5 gap-y-3 mt-5 text-sm text-gray-500 relative z-10">
                             <span className="flex items-center gap-1.5"><MapPin size={16} className="text-gray-400" /> {regions.join(', ')}</span>
@@ -199,7 +199,11 @@ export default function JobDetailPage() {
                             </div>
                             {user ? (
                                 user.role === 'CANDIDATE' ? (
-                                    applied ? (
+                                    job.isExternal ? (
+                                        <a href={job.externalApplyUrl || '#'} target="_blank" rel="noopener noreferrer" className="group relative w-full bg-[#0077b5] text-white font-semibold py-3.5 rounded-xl hover:bg-[#005580] transition shadow-[0_0_20px_rgba(0,119,181,0.2)] hover:shadow-[0_0_25px_rgba(0,119,181,0.4)] flex items-center justify-center gap-2 overflow-hidden">
+                                            <Send size={18} /> Postuler sur le site d'origine
+                                        </a>
+                                    ) : applied ? (
                                         <div className="text-center p-4 bg-[#14B53A]/10 border border-[#14B53A]/20 rounded-xl">
                                             <p className="text-[#14B53A] font-medium flex items-center justify-center gap-2"><CheckCircle2 size={16} /> Candidature envoyée !</p>
                                             <Link href="/dashboard/applications" className="text-sm text-[#14B53A]/80 hover:text-[#14B53A] underline mt-2 inline-block transition">Suivre mon dossier</Link>
@@ -213,7 +217,13 @@ export default function JobDetailPage() {
                                     <div className="text-center p-4 bg-white/[0.02] border border-white/[0.06] rounded-xl text-gray-400 text-sm flex flex-col items-center gap-2"><AlertCircle size={20} className="text-gray-500" />{user.role === 'RECRUITER' ? 'Seuls les candidats peuvent postuler.' : 'Les admins ne peuvent pas postuler.'}</div>
                                 )
                             ) : (
-                                <div className="space-y-2"><Link href="/login" className="block w-full text-center bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-100 transition">Postuler (connexion requise)</Link></div>
+                                <div className="space-y-2">
+                                    {job.isExternal ? (
+                                        <a href={job.externalApplyUrl || '#'} target="_blank" rel="noopener noreferrer" className="block w-full text-center bg-[#0077b5] text-white font-semibold py-3 rounded-xl hover:bg-[#005580] transition shadow-[0_0_20px_rgba(0,119,181,0.2)]">Postuler sur le site d'origine</a>
+                                    ) : (
+                                        <Link href="/login" className="block w-full text-center bg-white text-black font-semibold py-3 rounded-xl hover:bg-gray-100 transition">Postuler (connexion requise)</Link>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>

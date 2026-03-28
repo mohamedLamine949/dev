@@ -1,0 +1,18 @@
+[
+  {
+    "title": "Ingénieur Logiciel (Fullstack)",
+    "company": "Orange Mali",
+    "description": "Nous recherchons un ingénieur fullstack talentueux pour rejoindre notre équipe à Bamako. \n\nVous maîtrisez React et Node.js. Vous avez au moins 3 ans d'expérience.",
+    "applyUrl": "https://www.linkedin.com/jobs/view/fake-job-12345",
+    "location": "Bamako",
+    "workType": "Full-time"
+  },
+  {
+    "title": "Chef de Projet Marketing",
+    "company": "BNDA",
+    "description": "Rejoignez la BNDA en tant que Chef de Projet Marketing. Vous serez chargé de la promotion de nos nouveaux services bancaires digitaux.",
+    "applyUrl": "https://www.linkedin.com/jobs/view/fake-job-67890",
+    "location": "Bamako",
+    "workType": "Contract"
+  }
+]

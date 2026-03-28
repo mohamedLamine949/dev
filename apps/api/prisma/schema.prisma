@@ -138,7 +138,7 @@ model EmployerMember {
 
 model Job {
   id               String        @id @default(uuid())
-  employerId       String
+  employerId       String?
   title            String
   type             String
   sector           String
@@ -159,8 +159,15 @@ model Job {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   publishedAt      DateTime?
+  
+  // Nouveaux champs pour offres scrappées
+  isExternal       Boolean       @default(false)
+  externalCompany  String?
+  externalLogo     String?
+  externalApplyUrl String?
+
   applications     Application[]
-  employer         Employer      @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  employer         Employer?     @relation(fields: [employerId], references: [id], onDelete: Cascade)
   requiredDocs     RequiredDoc[]
   savedBy          SavedJob[]
 }
