@@ -62,14 +62,14 @@ const partners = [
 
 const testimonials = [
   {
-    quote: "Grâce à MaliEmploi, j'ai trouvé mon poste de comptable en seulement 3 semaines. Le coffre-fort de documents m'a vraiment simplifié la vie.",
+    quote: "Grâce à MaliTravail, j'ai trouvé mon poste de comptable en seulement 3 semaines. Le coffre-fort de documents m'a vraiment simplifié la vie.",
     name: "Aïssata Coulibaly",
     role: "Comptable — BDM·SA",
     city: "Bamako",
     initial: "A",
   },
   {
-    quote: "Nous utilisons MaliEmploi pour tous nos recrutements depuis 6 mois. La qualité des profils et la rapidité du processus sont incomparables.",
+    quote: "Nous utilisons MaliTravail pour tous nos recrutements depuis 6 mois. La qualité des profils et la rapidité du processus sont incomparables.",
     name: "Moussa Diallo",
     role: "DRH — Groupe Mory",
     city: "Bamako",
@@ -106,7 +106,7 @@ export default function Home() {
       <nav className="fixed top-[3px] left-0 right-0 z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl">
         <div className="mx-auto max-w-6xl px-6 flex h-14 items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold tracking-tight text-lg">MaliEmploi</span>
+            <span className="text-white font-bold tracking-tight text-lg">MaliTravail</span>
             <span className="text-[11px] text-[#FCD116]/80 font-medium border border-[#FCD116]/30 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
           </div>
           <div className="flex items-center gap-2">
@@ -151,7 +151,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
-            MaliEmploi connecte les talents maliens — et la diaspora — aux meilleures
+            MaliTravail connecte les talents maliens — et la diaspora — aux meilleures
             opportunités. Un coffre-fort de documents, des employeurs vérifiés,
             un processus de candidature simplifié.
           </p>
@@ -304,7 +304,7 @@ export default function Home() {
             Prêt à commencer ?
           </h2>
           <p className="text-gray-500 mb-8">
-            Rejoignez des milliers de candidats et recruteurs qui font confiance à MaliEmploi. Gratuit, rapide, sécurisé.
+            Rejoignez des milliers de candidats et recruteurs qui font confiance à MaliTravail. Gratuit, rapide, sécurisé.
           </p>
           <div className="flex gap-3 justify-center">
             <Link href="/register"
@@ -319,11 +319,92 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── CONTACT ── */}
+      <section className="border-t border-white/[0.06] py-24">
+        <div className="mx-auto max-w-xl px-6">
+          <div className="mb-12 text-center">
+            <p className="text-xs uppercase tracking-widest text-gray-600 mb-3">Contact</p>
+            <h2 className="text-3xl font-bold text-white tracking-tight mb-4">Contactez-nous</h2>
+            <p className="text-gray-500 text-sm">Une question ? Un partenariat ? Notre équipe vous répond sous 24h.</p>
+          </div>
+
+          <form action="https://formspree.io/f/mojklyrb" method="POST" className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input
+                type="text"
+                name="name"
+                required
+                placeholder="Votre nom"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
+              />
+              <input
+                type="email"
+                name="email"
+                required
+                placeholder="Email professionnel"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all"
+              />
+            </div>
+            <textarea
+              name="message"
+              required
+              rows={4}
+              placeholder="Votre message..."
+              className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all resize-none"
+            />
+            <button
+              type="submit"
+              className="w-full bg-white text-black font-bold py-3.5 rounded-xl hover:bg-gray-100 transition-colors shadow-lg shadow-white/5"
+            >
+              Envoyer le message
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {/* ── FOUNDERS ── */}
+      <section className="border-t border-white/[0.06] py-24">
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <p className="text-xs uppercase tracking-widest text-gray-600 mb-12">Les Fondateurs</p>
+          <div className="flex flex-col sm:flex-row justify-center gap-8">
+            <a
+              href="https://www.linkedin.com/in/mlkoné-3ac5/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-4 bg-white/[0.02] border border-white/10 rounded-2xl px-6 py-4 hover:bg-white/[0.05] hover:border-white/20 transition-all"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-white group-hover:scale-110 transition-transform">
+                ML
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-white">Mohamed-Lamine Koné</p>
+                <p className="text-[11px] text-gray-500 uppercase tracking-tighter">Co-fondateur · LinkedIn</p>
+              </div>
+            </a>
+
+            <a
+              href="https://www.linkedin.com/in/sidi-gano/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-4 bg-white/[0.02] border border-white/10 rounded-2xl px-6 py-4 hover:bg-white/[0.05] hover:border-white/20 transition-all"
+            >
+              <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-white group-hover:scale-110 transition-transform">
+                SG
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-white">Sidi Gano</p>
+                <p className="text-[11px] text-gray-500 uppercase tracking-tighter">Co-fondateur · LinkedIn</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── FOOTER ── */}
       <footer className="border-t border-white/[0.06] py-10">
         <div className="mx-auto max-w-6xl px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-white font-bold text-sm">MaliEmploi</span>
+            <span className="text-white font-bold text-sm">MaliTravail</span>
             <span className="text-gray-600 text-xs">🇲🇱 Plateforme nationale de l&apos;emploi</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-gray-600">
@@ -331,7 +412,7 @@ export default function Home() {
             <Link href="/register" className="hover:text-gray-400 transition-colors">Inscription</Link>
             <Link href="/login" className="hover:text-gray-400 transition-colors">Connexion</Link>
           </div>
-          <p className="text-xs text-gray-700">© 2026 MaliEmploi. Fait au Mali 🇲🇱</p>
+          <p className="text-xs text-gray-700">© 2026 MaliTravail. Fait au Mali 🇲🇱</p>
         </div>
       </footer>
 

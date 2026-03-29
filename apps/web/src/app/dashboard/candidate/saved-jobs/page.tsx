@@ -63,7 +63,7 @@ export default function SavedJobsPage() {
 
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
                 <Link href="/dashboard" className="flex items-center gap-2">
-                    <span className="text-white font-bold tracking-tight">MaliEmploi</span>
+                    <span className="text-white font-bold tracking-tight">MaliTravail</span>
                 </Link>
                 <Link href="/dashboard" className="text-sm text-gray-500 hover:text-white transition flex items-center gap-1">
                     <ChevronLeft size={16} /> Tableau de bord

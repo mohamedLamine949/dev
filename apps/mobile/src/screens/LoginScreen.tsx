@@ -33,7 +33,7 @@ export default function LoginScreen() {
     return (
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.card}>
-                <Text style={styles.logo}>MaliEmploi</Text>
+                <Text style={styles.logo}>MaliTravail</Text>
                 <Text style={styles.subtitle}>Connectez-vous à votre espace</Text>
 
                 <TextInput

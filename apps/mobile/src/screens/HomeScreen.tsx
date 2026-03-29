@@ -16,13 +16,13 @@ export default function HomeScreen() {
     const roleColor = user.role === 'RECRUITER' ? '#2563eb' : user.role === 'ADMIN' ? '#7c3aed' : '#16a34a';
 
     const candidateActions = [
-        { icon: '💼', label: 'Offres d\'emploi', desc: 'Parcourir les offres', route: 'MaliEmploi Jobs' },
+        { icon: '💼', label: 'Offres d\'emploi', desc: 'Parcourir les offres', route: 'MaliTravail Jobs' },
         { icon: '📄', label: 'Mon CV', desc: 'Gérer mon profil', route: 'Mon Profil' },
         { icon: '📋', label: 'Candidatures', desc: 'Suivre mes dossiers', route: 'Mes Candidatures' },
         { icon: '📁', label: 'Documents', desc: 'Coffre-fort', route: 'Coffre-fort' },
     ];
     const recruiterActions = [
-        { icon: '💼', label: 'Offres publiées', desc: 'Gérer vos offres', route: 'MaliEmploi Jobs' },
+        { icon: '💼', label: 'Offres publiées', desc: 'Gérer vos offres', route: 'MaliTravail Jobs' },
         { icon: '➕', label: 'Publier', desc: 'Nouvelle offre', route: 'RecruiterNewJob' },
         { icon: '📋', label: 'Candidatures', desc: 'Suivre les dossiers', route: 'RecruiterApplications' },
         { icon: '🏢', label: 'Mon Entreprise', desc: 'Profil de structure', route: 'RecruiterEmployer' },
@@ -33,7 +33,7 @@ export default function HomeScreen() {
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
             {/* Header */}
             <View style={styles.header}>
-                <Text style={styles.appName}>MaliEmploi</Text>
+                <Text style={styles.appName}>MaliTravail</Text>
                 <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
                     <Text style={styles.logoutText}>Quitter</Text>
                 </TouchableOpacity>

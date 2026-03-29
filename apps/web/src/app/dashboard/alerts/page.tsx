@@ -110,7 +110,7 @@ export default function AlertsPage() {
             </div>
 
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
-                <Link href="/" className="text-white font-bold tracking-tight">MaliEmploi</Link>
+                <Link href="/" className="text-white font-bold tracking-tight">MaliTravail</Link>
                 <Link href="/dashboard" className="text-sm text-gray-500 hover:text-white transition">← Tableau de bord</Link>
             </nav>
 

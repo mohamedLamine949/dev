@@ -75,7 +75,7 @@ export default function RecruiterApplicationsPage() {
             </div>
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="text-white font-bold tracking-tight">MaliEmploi</span>
+                    <span className="text-white font-bold tracking-tight">MaliTravail</span>
                     <span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
                 </Link>
                 <div className="flex items-center gap-4">

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MaliEmploi — Plateforme d'emploi au Mali",
+  title: "MaliTravail — Plateforme d'emploi au Mali",
   description: "Trouvez les meilleures opportunités d'emploi au Mali ou recrutez les meilleurs talents africains.",
 };
 

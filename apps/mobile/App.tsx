@@ -42,7 +42,7 @@ function TabNavigator() {
         tabBarInactiveTintColor: '#6b7280',
       }}
     >
-      <Tab.Screen name="MaliEmploi Jobs" component={HomeScreen} options={{ tabBarLabel: 'Offres', tabBarIcon: ({ color, size }) => <Home color={color as string} size={size as number} /> }} />
+      <Tab.Screen name="MaliTravail Jobs" component={HomeScreen} options={{ tabBarLabel: 'Offres', tabBarIcon: ({ color, size }) => <Home color={color as string} size={size as number} /> }} />
       <Tab.Screen name="Mes Candidatures" component={ApplicationsScreen} options={{ tabBarLabel: 'Candidatures', tabBarIcon: ({ color, size }) => <Briefcase color={color as string} size={size as number} /> }} />
       <Tab.Screen name="Coffre-fort" component={VaultScreen} options={{ tabBarLabel: 'Documents', tabBarIcon: ({ color, size }) => <FolderSearch color={color as string} size={size as number} /> }} />
       <Tab.Screen name="Mon Profil" component={ProfileScreen} options={{ tabBarLabel: 'Profil', tabBarIcon: ({ color, size }) => <UserCircle color={color as string} size={size as number} /> }} />

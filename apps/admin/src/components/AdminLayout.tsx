@@ -48,7 +48,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <div className="flex items-center gap-3 px-2">
                     <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-green-600/30">ML</div>
                     <div>
-                        <h1 className="font-bold text-lg leading-none">MaliEmploi</h1>
+                        <h1 className="font-bold text-lg leading-none">MaliTravail</h1>
                         <span className="text-[10px] text-green-500 font-bold tracking-widest uppercase">Admin Panel</span>
                     </div>
                 </div>

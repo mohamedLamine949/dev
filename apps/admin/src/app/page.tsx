@@ -90,7 +90,7 @@ export default function Dashboard() {
         {/* Headers */}
         <div className="mb-8">
           <h1 className="text-3xl font-black text-white mb-2">Centre de Pilotage (CRM)</h1>
-          <p className="text-gray-400 text-sm">Vue globale de l'activité, des conversions et des vérifications sur MaliEmploi.</p>
+          <p className="text-gray-400 text-sm">Vue globale de l'activité, des conversions et des vérifications sur MaliTravail.</p>
         </div>
 
         {/* Top KPI Cards */}
