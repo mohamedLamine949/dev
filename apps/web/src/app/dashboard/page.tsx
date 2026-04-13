@@ -68,7 +68,7 @@ export default function DashboardPage() {
             {/* Nav */}
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="text-white font-bold tracking-tight">MaliTravail</span>
+                    <span className="text-white font-bold tracking-tight">MaliEmploi</span>
                     <span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
                 </Link>
                 <div className="flex items-center gap-4">
@@ -167,7 +167,7 @@ export default function DashboardPage() {
                         <>
                             <motion.div variants={itemVariants}><ActionCard icon={<PlusCircle size={24} strokeWidth={1.5} />} title="Publier une offre" desc="Créer une annonce" href="/dashboard/recruiter/jobs/new" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<Building size={24} strokeWidth={1.5} />} title="Mon Entreprise" desc="Profil employeur" href="/dashboard/recruiter/employer" /></motion.div>
-                            <motion.div variants={itemVariants}><ActionCard icon={<Megaphone size={24} strokeWidth={1.5} />} title="Mes offres" desc="Gérer mes annonces" href="/jobs" /></motion.div>
+                            <motion.div variants={itemVariants}><ActionCard icon={<Megaphone size={24} strokeWidth={1.5} />} title="Mes offres" desc="Gérer mes annonces" href="/dashboard/recruiter/jobs" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<Inbox size={24} strokeWidth={1.5} />} title="Candidatures" desc="Examiner les dossiers" href="/dashboard/recruiter/applications" /></motion.div>
                             <motion.div variants={itemVariants}><ActionCard icon={<Star size={24} strokeWidth={1.5} />} title="Trouver des Talents" desc="Recherche avancée" href="/dashboard/recruiter/talents" /></motion.div>
                         </>

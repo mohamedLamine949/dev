@@ -133,7 +133,7 @@ export default function JobDetailPage() {
         <div className="min-h-screen bg-[#0a0a0a]">
             <div className="fixed top-0 left-0 right-0 flex h-[3px] z-50"><div className="flex-1 bg-[#14B53A]" /><div className="flex-1 bg-[#FCD116]" /><div className="flex-1 bg-[#CE1126]" /></div>
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2"><span className="text-white font-bold tracking-tight">MaliTravail</span><span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span></Link>
+                <Link href="/" className="flex items-center gap-2"><span className="text-white font-bold tracking-tight">MaliEmploi</span><span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span></Link>
                 <Link href="/jobs" className="text-sm text-gray-400 hover:text-white transition group flex items-center gap-1"><span className="group-hover:-translate-x-1 transition-transform">←</span> Retour aux offres</Link>
             </nav>
 

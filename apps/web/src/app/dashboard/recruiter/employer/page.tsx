@@ -204,7 +204,7 @@ export default function EmployerProfilePage() {
             </div>
             <nav className="sticky top-[3px] z-40 border-b border-white/[0.06] bg-[#0a0a0a]/90 backdrop-blur-xl px-6 h-14 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <span className="text-white font-bold tracking-tight">MaliTravail</span>
+                    <span className="text-white font-bold tracking-tight">MaliEmploi</span>
                     <span className="text-[11px] text-[#FCD116]/70 border border-[#FCD116]/25 rounded px-1.5 py-0.5 leading-none">🇲🇱</span>
                 </Link>
                 <Link href="/dashboard" className="text-sm text-gray-500 hover:text-white transition">← Tableau de bord</Link>
@@ -254,7 +254,7 @@ export default function EmployerProfilePage() {
                         className="flex items-start gap-3 p-4 rounded-2xl border border-white/10 bg-white/[0.03] mb-6">
                         <span className="text-xl shrink-0">🎉</span>
                         <div>
-                            <p className="text-sm font-bold text-white">Bienvenue sur MaliTravail !</p>
+                            <p className="text-sm font-bold text-white">Bienvenue sur MaliEmploi !</p>
                             <p className="text-xs text-gray-400 mt-0.5">
                                 Pour commencer à publier des offres, remplissez le profil de votre entreprise. L&apos;admin validera votre dossier sous peu.
                             </p>

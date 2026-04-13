@@ -37,6 +37,7 @@ export interface JobFilters {
     educationLevel?: string;
     isDiaspora?: boolean;
     userId?: string;
+    employerId?: string;
     page?: number;
     limit?: number;
 }
@@ -50,13 +51,22 @@ export class JobsService {
     ) { }
 
     async findAll(filters: JobFilters = {}) {
-        const { keyword, sector, type, region, educationLevel, isDiaspora, userId, page = 1, limit = 20 } = filters;
+        const { keyword, sector, type, region, educationLevel, isDiaspora, userId, employerId, page = 1, limit = 20 } = filters;
         const skip = (page - 1) * limit;
 
         const where: any = {
             status: 'PUBLISHED',
             deadline: { gte: new Date() },
         };
+
+        if (employerId) {
+            // When querying for a specific employer, we want to see all their jobs including drafts/expired potentially?
+            // Usually yes, but for now we'll just filter by employerId and maybe remove the status/deadline constraints.
+            // Let's modify the default where if employerId is provided.
+            delete where.status;
+            delete where.deadline;
+            where.employerId = employerId;
+        }
 
         if (keyword) {
             where.OR = [

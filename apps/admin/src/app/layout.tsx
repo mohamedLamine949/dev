@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MaliTravail | Administration",
-  description: "Panneau d'administration de MaliTravail",
+  title: "MaliEmploi | Administration",
+  description: "Panneau d'administration de MaliEmploi",
 };
 
 import { AuthProvider } from "@/context/AuthContext";

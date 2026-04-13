@@ -102,6 +102,22 @@ export class EmployerController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Get('me/jobs')
+    async getMyJobs(@Request() req: any) {
+        const userId = req.user.id;
+        const membership = await this.prisma.employerMember.findFirst({
+            where: { userId }
+        });
+        if (!membership) return { jobs: [], total: 0 };
+        const jobs = await this.prisma.job.findMany({
+            where: { employerId: membership.employerId },
+            orderBy: { createdAt: 'desc' },
+            include: { employer: { select: { name: true, logoS3Key: true } } }
+        });
+        return { jobs, total: jobs.length };
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Patch('me')
     async updateMyEmployer(@Request() req: any, @Body() body: any) {
         const userId = req.user.id;

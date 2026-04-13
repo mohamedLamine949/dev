@@ -21,6 +21,7 @@ export class JobsController {
             educationLevel: query.educationLevel,
             isDiaspora: query.diaspora === 'true',
             userId: query.userId,
+            employerId: query.employerId,
             page: query.page ? parseInt(query.page) : 1,
             limit: query.limit ? parseInt(query.limit) : 20,
         };
